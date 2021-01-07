@@ -1,1 +1,1 @@
-This folder is designed for research and learning material to be placed. This will folder will hold links, tutorials, guides, etc. to all the technology and tools the team
+This folder is designed for research and learning material to be placed. This will folder will hold links, tutorials, guides, etc. to all the technology and tools the team. There is bound to be overlap in information and tutorials i.e. if there is an article of video on how to hook up a NodeJS app to your firebase project, the material may be present in either or both related folders.

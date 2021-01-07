@@ -1,0 +1,1 @@
+This folder contains information relevent to the development of our Chrome browser Extension
