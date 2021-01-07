@@ -1,0 +1,1 @@
+This folder is designed for research and learning material to be placed. This will folder will hold links, tutorials, guides, etc. to all the technology and tools the team
