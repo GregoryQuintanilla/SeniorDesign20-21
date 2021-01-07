@@ -16,6 +16,7 @@ This is a running Sandbox development of the ideas of our system. This current S
 - 1 that sends a request to the node app.
 
 ## NodeJS Express App
+This app code is located in the SeniorDesignTestHost/functions/index.js
 - has a root page
 - has a basic timestamp page found in the firebase tutorial video found in the ~/Tools/Firebase
 - has a basic get request.
