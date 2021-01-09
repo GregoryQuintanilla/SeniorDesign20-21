@@ -39,3 +39,14 @@ app.get('/addToDB', (request,response) => {
 });
 */
 ```
+- If everything is set up correctly you should be able to navigate to whatever folder your project is you can run the command 'firebase serve' and it should take care of everything.
+
+- Once this code is all in place you should be able to just visit the URLs in your browser (https://localhost:#####/) and it should come up. After 
+a node app is really just a dynamic webpage, we just aren't using it for that exact purpose. Play around with making you own routes just so you get
+the hang of its form. This page can help with understanding NodeJS express routing: https://expressjs.com/en/guide/routing.html 
+
+- If you also have the extension set up you can play around with connecting the two. Make sure the NodeJS is running and click the button and see 
+what happens. From here if everything is working you're ready to develop stuff. 
+
+- I do apologise if this Guide is less helpful because everything is a bit fuzzy from when I did this and I did a poor job at documenting what 
+exactly it is I did.
