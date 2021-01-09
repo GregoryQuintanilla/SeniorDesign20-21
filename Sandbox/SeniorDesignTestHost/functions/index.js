@@ -38,16 +38,6 @@ app.get('/timestamp-cached',(request, response) => {
     response.send(`${Date.now()}`);
 });
 
-app.get('/toServer', (request, response) => {
-    //console.log(request)
-    console.log(request.body);
-    console.log(request.params);
-    console.log(request.query);
-    response.send("Your info has been logged");
-    //console.log("----------------------------------TEST--------------------------------")
-    //response.send("This is the way I want to go for things");
-    //response.send("We want to get a url and do stuff with it, let's get the url");
-});
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
