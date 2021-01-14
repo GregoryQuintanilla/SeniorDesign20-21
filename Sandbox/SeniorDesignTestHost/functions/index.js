@@ -30,6 +30,7 @@ app.get('/addToDB', (request,response) => {
     response.send('Added data to the db hopefully');
 });
 
+// Test Function to see how interacting with external js files works.
 app.get('/testExternalFunctions', (request,response) => {
     console.log(processing);
     processing.test();
