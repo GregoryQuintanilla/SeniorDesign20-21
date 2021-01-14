@@ -5,6 +5,7 @@ admin.initializeApp();
 const db = admin.firestore();
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
+const processing = require("./processing.js"); // this is the processing js file. The String needs to be the path to the file.
 
 
 
@@ -27,6 +28,13 @@ app.get('/addToDB', (request,response) => {
         age: 22,
     });
     response.send('Added data to the db hopefully');
+});
+
+app.get('/testExternalFunctions', (request,response) => {
+    console.log(processing);
+    processing.test();
+    processing.test2();
+    response.send("Sucess!")
 });
 
 app.get('/timestamp', (request, response) => {
