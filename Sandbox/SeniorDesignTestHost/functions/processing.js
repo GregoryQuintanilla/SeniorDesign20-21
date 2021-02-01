@@ -33,13 +33,63 @@
 
 
 
-// My Preference but it won't kill me if y'all disagree
+// --- My Preference but it won't kill me if y'all disagree ---
+// since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
+var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+
 function test(){
     console.log("This is a test function from an external js file.")
 }
 
 function test2(){
-    console.log("This is the SECOND functio to test how the exporting works really.")
+    console.log("This is the SECOND functio to test how the exporting works really.");
 }
 
-module.exports = {test,test2};
+function massDataLoad(){
+   console.log("Loadphish tank database...");
+   
+   var phishTankReq = new XMLHttpRequest();
+   phishTankReq.open("GET","https://data.phishtank.com/data/online-valid.json", false);
+   phishTankReq.onload = function (){
+           if(phishTankReq.status == 302){
+                console.log("GOT A 302");
+                console.log("REQUEST");
+                console.log(phishTankReq);
+                console.log("ENDREQUEST");
+                
+                //console.log(phishTankReq.responseURL);
+                
+                //console.log("\nHEADERS\n");
+                //var headers = phishTankReq.getAllResponseHeaders();
+                //console.log(headers);
+                //console.log("\nENDHEADER\n");
+
+                //Acquire the temporary location of the requested file.
+                console.log("\nLOCATION\n");
+                var newLocation = phishTankReq.getResponseHeader("location");
+                console.log(newLocation);
+                console.log("\nENDLOCATION\n"); //Have hit this line 2.1.21
+
+
+                // Hopefully we have the correct URL for the moved address of the .json file
+                // Code getting hung here 2.1.21
+                // This request gets a lot of data back, so it takes quite some time to get and pull in.
+                // This process will take some time, but good thing this is going to be an automated update piece.
+                // Hopefully developer stuff has a faster way
+                var newLocationReq = new XMLHttpRequest();
+                newLocationReq.open("GET",newLocation,false);
+                newLocationReq.onload = function () {
+                    console.log("New Request Sent & Recieved");
+                    //console.log(newLocationReq);
+                    var data = JSON.parse(newLocationReq.responseText);
+                }
+                newLocationReq.send(null);
+           //var headers = phsihTankReq.getResponseHeaders();
+           //console.log(headers);
+       };
+    }
+
+   phishTankReq.send(null);
+   //return phishTankReq;
+}
+module.exports = {test,test2, massDataLoad};
