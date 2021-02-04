@@ -11,7 +11,7 @@ const processing = require("./processing.js"); // this is the processing js file
 
 
 
-const testDocRef = db.collection('dummies').doc('greg');
+const testDocRef = db.collection('dummies').doc('URLs');
 app.get('/',(request, response) =>{
     // This is a fun important piece. Since we are the owners of the server we can do whatever the hell we want and accept request from whatever hosts. I reccommend
     // being atleast familiar with what Cross Origin Resource Sharing (CORS) is and the "idea" behind it. It is a pain in the neck for devs because it is enforced by
@@ -36,6 +36,24 @@ app.get('/testExternalFunctions', (request,response) => {
     processing.test();
     processing.test2();
     response.send("Sucess!")
+});
+
+app.get('/reportLink', (request, response) => {
+    var URL = request.query.link;
+    // Validate URL here before adding to DB:
+
+    // Add document for URL
+    /*testDocRef.set({
+        id: 0,
+        url: 'https://www.example.com/',
+        online: 'yes'
+    });*/
+
+    // If valid
+    response.send(`Added ${URL} to database.`);
+
+    // If invalid
+    //response.send(Error adding website to database.);
 });
 
 app.get('/timestamp', (request, response) => {
