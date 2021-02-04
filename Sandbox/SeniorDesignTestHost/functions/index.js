@@ -32,6 +32,7 @@ app.get('/addToRealTimeDB',(request,response) =>{
 });
 app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
+
     console.log("callinng function");
     // Signal to trigger the back end DB loading.
     var data = processing.massDataLoad(); // make this async at some point? We don't need this to wait for the system to return back
