@@ -2,16 +2,16 @@ const functions = require('firebase-functions'); // for hosting
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-const db = admin.firestore();
+
+const RealTimeDB = admin.database();
+const firestoreDB = admin.firestore();
+
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
 const processing = require("./processing.js"); // this is the processing js file. The String needs to be the path to the file.
 
 
-
-
-
-const testDocRef = db.collection('dummies').doc('greg');
+const testDocRef = firestoreDB.collection('dummies').doc('greg');
 app.get('/',(request, response) =>{
     // This is a fun important piece. Since we are the owners of the server we can do whatever the hell we want and accept request from whatever hosts. I reccommend
     // being atleast familiar with what Cross Origin Resource Sharing (CORS) is and the "idea" behind it. It is a pain in the neck for devs because it is enforced by
@@ -22,6 +22,25 @@ app.get('/',(request, response) =>{
 
     //now that we can have the browser talk to the server (!!!) this is where just straight dev comes in. Time to play around
 })
+
+app.get('/addToRealTimeDB',(request,response) =>{
+    /*RealTimeDB.ref('usrs/testURL').set({
+        url: 'abc.com',
+        id: 1
+    });*/
+    response.send(admin.auth().app);
+});
+app.get('/massDataLoad', (request,response) => {
+    response.set('Access-Controle-Allow-Origin','*');
+    console.log("callinng function");
+    // Signal to trigger the back end DB loading.
+    var data = processing.massDataLoad(); // make this async at some point? We don't need this to wait for the system to return back
+
+    console.log(data)
+    console.log("Called function");
+
+    response.send("hopefully data is mass loaded. idk.")
+});
 app.get('/addToDB', (request,response) => {
     testDocRef.set({
         name: 'greg',
