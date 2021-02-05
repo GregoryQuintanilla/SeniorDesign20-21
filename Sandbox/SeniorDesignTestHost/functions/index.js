@@ -35,13 +35,18 @@ app.get('/massDataLoad', (request,response) => {
 
     console.log("callinng function");
     // Signal to trigger the back end DB loading.
-    var data = processing.massDataLoad(); // make this async at some point? We don't need this to wait for the system to return back
+    var data = processing.massDataLoad(firestoreDB); // make this async at some point? We don't need this to wait for the system to return back
 
     console.log(data)
     console.log("Called function");
 
     response.send("hopefully data is mass loaded. idk.")
 });
+app.get('/del', (request, response) => {
+    response.set('Access-Control-Allow-Origin','*');
+    processing.deleteData(firestoreDB);
+    response.send("Deleted code specified entries");
+})
 app.get('/addToDB', (request,response) => {
     testDocRef.set({
         name: 'greg',

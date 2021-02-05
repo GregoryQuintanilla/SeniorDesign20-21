@@ -44,8 +44,30 @@ function test(){
 function test2(){
     console.log("This is the SECOND functio to test how the exporting works really.");
 }
+function deleteData(dbCred){
+   var coll = dbCred.collection('dummies')
+   console.log(coll);
+   return 0;
+}
 
-function massDataLoad(){
+// the start of the automated data load function. Contacts phishtank and reqests it's data to be loaded into the cloud firestore
+// currently traverses to the .json data and requests it. taking that object it is loaded into the cloud firestore
+// dbCred = the credentials of the cloud firestore. Currently this function is called from index.js of the node and passed the admin.firestore() credentials
+
+function massDataLoad(dbCred){
+    /*
+    console.log("DB ADD");
+    console.log(dbCred);
+    var coll = dbCred.collection("dummies")
+    for (i =0; i < 10; i++) {
+        var URLName = "URL" + String(i);
+        coll.doc(URLName).set({
+            name: URLName,
+            id: i,
+        });
+    }
+    return 0;
+    */
    console.log("Loadphish tank database...");
    
    var phishTankReq = new XMLHttpRequest();
@@ -78,18 +100,32 @@ function massDataLoad(){
                 // Hopefully developer stuff has a faster way
                 var newLocationReq = new XMLHttpRequest();
                 newLocationReq.open("GET",newLocation,false);
+                // Each element in the data array is an entry of the phish tank DB
                 newLocationReq.onload = function () {
                     console.log("New Request Sent & Recieved");
+
+                    var coll = dbCred.collection("dummies")
+                    
                     //console.log(newLocationReq);
                     var data = JSON.parse(newLocationReq.responseText);
+                    for (i = 0; i<10; i++){
+                        var curURL = data[i].url;
+                        console.log(curURL);
+                        coll.doc(curURL).set({
+                            url: curURL
+                        })
+                    }
+                    // console.log(data[0]);
+                    
                 }
                 newLocationReq.send(null);
            //var headers = phsihTankReq.getResponseHeaders();
            //console.log(headers);
-       };
+
+       }; 
     }
 
    phishTankReq.send(null);
    //return phishTankReq;
 }
-module.exports = {test,test2, massDataLoad};
+module.exports = {test,test2, massDataLoad, deleteData};
