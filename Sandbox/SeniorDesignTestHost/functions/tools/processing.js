@@ -45,8 +45,48 @@ function test2(){
     console.log("This is the SECOND functio to test how the exporting works really.");
 }
 function deleteData(dbCred){
-   var coll = dbCred.collection('dummies')
-   console.log(coll);
+   // We are encountering promises!
+   // for a solid youtube video about them from google specifically:
+   // https://www.youtube.com/watch?v=7IkUgCLr5oA
+   //
+   // essentially Promises are an object that says some async work is being done in the backgroud. they have 3 states:
+   // Pending - the work is currently being done
+   // fullfilled - the work has completed
+   // rejected - the work was unable to finish
+   // all function that return promises return them immediately, most likely in the pending state and we need to use that same promise
+   // object to wait for it to be fullfilled. 
+   // Most of them have some .then that can be made to handle when the promise if finished.
+   var coll = dbCred.collection('test1').get(); // gets a snapshot of the collection
+
+   // accessing each of the docs
+   coll.then(query =>{
+       var documents = query.docs
+
+       documents.forEach(doc => {
+           console.log(doc.id);
+           console.log(doc.data());
+       });
+       return 0;
+   });
+
+
+   /*
+   if(mydoc){
+       console.log("Found a doc?");
+       console.log(mydoc);
+       console.log(mydoc.id);
+       // some async work ad process of getting the data from a document.
+       var docData = mydoc.get();
+       docData.then(snapshot => {
+           console.log(snapshot);
+           console.log(snapshot.data())
+           return 0;
+       })
+   }
+   else{
+       console.log("didint find the doc");
+   }
+   */
    return 0;
 }
 
@@ -55,73 +95,35 @@ function deleteData(dbCred){
 // dbCred = the credentials of the cloud firestore. Currently this function is called from index.js of the node and passed the admin.firestore() credentials
 
 function massDataLoad(dbCred){
-    /*
-    console.log("DB ADD");
-    console.log(dbCred);
-    var coll = dbCred.collection("dummies")
-    for (i =0; i < 10; i++) {
-        var URLName = "URL" + String(i);
-        coll.doc(URLName).set({
-            name: URLName,
-            id: i,
-        });
-    }
-    return 0;
-    */
    console.log("Loadphish tank database...");
    
    var phishTankReq = new XMLHttpRequest();
    phishTankReq.open("GET","https://data.phishtank.com/data/online-valid.json", false);
    phishTankReq.onload = function (){
            if(phishTankReq.status == 302){
-                console.log("GOT A 302");
-                console.log("REQUEST");
-                console.log(phishTankReq);
-                console.log("ENDREQUEST");
-                
-                //console.log(phishTankReq.responseURL);
-                
-                //console.log("\nHEADERS\n");
-                //var headers = phishTankReq.getAllResponseHeaders();
-                //console.log(headers);
-                //console.log("\nENDHEADER\n");
-
                 //Acquire the temporary location of the requested file.
-                console.log("\nLOCATION\n");
                 var newLocation = phishTankReq.getResponseHeader("location");
-                console.log(newLocation);
-                console.log("\nENDLOCATION\n"); //Have hit this line 2.1.21
-
 
                 // Hopefully we have the correct URL for the moved address of the .json file
-                // Code getting hung here 2.1.21
-                // This request gets a lot of data back, so it takes quite some time to get and pull in.
-                // This process will take some time, but good thing this is going to be an automated update piece.
-                // Hopefully developer stuff has a faster way
+
                 var newLocationReq = new XMLHttpRequest();
                 newLocationReq.open("GET",newLocation,false);
                 // Each element in the data array is an entry of the phish tank DB
                 newLocationReq.onload = function () {
                     console.log("New Request Sent & Recieved");
 
-                    var coll = dbCred.collection("dummies")
+                    var coll = dbCred.collection("test1")
                     
-                    //console.log(newLocationReq);
                     var data = JSON.parse(newLocationReq.responseText);
                     for (i = 0; i<10; i++){
                         var curURL = data[i].url;
                         console.log(curURL);
-                        coll.doc(curURL).set({
+                        coll.doc(String(i)).set({
                             url: curURL
                         })
                     }
-                    // console.log(data[0]);
-                    
                 }
                 newLocationReq.send(null);
-           //var headers = phsihTankReq.getResponseHeaders();
-           //console.log(headers);
-
        }; 
     }
 

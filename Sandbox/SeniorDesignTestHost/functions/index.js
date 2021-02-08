@@ -8,7 +8,7 @@ const firestoreDB = admin.firestore();
 
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
-const processing = require("./processing.js"); // this is the processing js file. The String needs to be the path to the file.
+const processing = require("./tools/processing.js"); // this is the processing js file. The String needs to be the path to the file.
 
 
 const testDocRef = firestoreDB.collection('dummies').doc('greg');
