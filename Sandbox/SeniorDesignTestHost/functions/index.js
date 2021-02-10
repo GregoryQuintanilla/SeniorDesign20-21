@@ -8,7 +8,7 @@ const firestoreDB = admin.firestore();
 
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
-const processing = require("./tools/processing.js"); // this is the processing js file. The String needs to be the path to the file.
+const processing = require("./tools/databasefuncs.js"); // this is the processing js file. The String needs to be the path to the file.
 
 
 const testDocRef = firestoreDB.collection('dummies').doc('greg');
@@ -54,6 +54,13 @@ app.get('/addToDB', (request,response) => {
     });
     response.send('Added data to the db hopefully');
 });
+
+app.get('/findURL', (request, response) => {
+    response.set('Access-Control-Allow-Origin','*');
+    var positive = processing.searchURL(firestoreDB,"http://pt-o.top/awb.html");
+    var negative = processing.searchURL(firestoreDB,"http://www.google.com");
+    response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
+})
 
 // Test Function to see how interacting with external js files works.
 app.get('/testExternalFunctions', (request,response) => {

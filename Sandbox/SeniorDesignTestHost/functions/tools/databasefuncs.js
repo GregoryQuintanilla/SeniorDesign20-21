@@ -36,15 +36,14 @@
 // --- My Preference but it won't kill me if y'all disagree ---
 // since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-
-function test(){
-    console.log("This is a test function from an external js file.")
-}
-
-function test2(){
-    console.log("This is the SECOND functio to test how the exporting works really.");
-}
+// TODO
 function deleteData(dbCred){
+   // How do we want to go about how we will delete data?
+   // When will we delete data?
+   // Who triggers these deletions? Server most likely.
+   // Any manual deletions?
+   // We can do by url/ID
+
    // We are encountering promises!
    // for a solid youtube video about them from google specifically:
    // https://www.youtube.com/watch?v=7IkUgCLr5oA
@@ -89,12 +88,41 @@ function deleteData(dbCred){
    */
    return 0;
 }
+//TODO
+// a few different type of search functions for different systems. By URL will probably be the first one because of the nature
+// of the extenstion
+function searchURL(dbCred, curURL){
+    // encountering lots of promises wonky-ness
+    var URLCollection_promise = dbCred.collection("test1").get();
+    var result = URLCollection_promise.then(query => {
+        var documents = query.docs;
+        var match = 0;
+        documents.forEach(doc => {
+            if(doc.data().url == curURL){
+               match = 1
+            }
+        });
+        console.log(curURL + " " + String(match));
+        return match;
+    });
+    console.log(result);
+    return result;
+    
+}
+// function searchByID{}
 
 // the start of the automated data load function. Contacts phishtank and reqests it's data to be loaded into the cloud firestore
 // currently traverses to the .json data and requests it. taking that object it is loaded into the cloud firestore
 // dbCred = the credentials of the cloud firestore. Currently this function is called from index.js of the node and passed the admin.firestore() credentials
-
+function addToDB(dbCred, malURL){
+    var urlCollection = dbCred.collection("test1") // update collection name once the depoy DB is determined
+    
+    urlCollection.doc().set({
+        url: malURL
+    })
+}
 function massDataLoad(dbCred){
+   // Is ready, just adjust the for loop to do all data.
    console.log("Loadphish tank database...");
    
    var phishTankReq = new XMLHttpRequest();
@@ -115,10 +143,19 @@ function massDataLoad(dbCred){
                     var coll = dbCred.collection("test1")
                     
                     var data = JSON.parse(newLocationReq.responseText);
-                    for (i = 0; i<10; i++){
+                    for (i = 0; i<3; i++){
                         var curURL = data[i].url;
                         console.log(curURL);
-                        coll.doc(String(i)).set({
+                        // leaving .doc() blank has firestore auto-generate the ids
+                            // easy and automated
+                            // will degrade search performance
+                        // we could pull id #'s from phishtank and follow their conventions
+                            // easy enough to grab on loads and updates
+                            // if phishtank ever mass changes id numbers, this may casue issues for our tracking
+                        // we could track our own id #'s
+                            // again will cause search degredation
+                            // our own system though and will require a bit more management.
+                        coll.doc().set({
                             url: curURL
                         })
                     }
@@ -130,4 +167,9 @@ function massDataLoad(dbCred){
    phishTankReq.send(null);
    //return phishTankReq;
 }
-module.exports = {test,test2, massDataLoad, deleteData};
+// TODO
+// The framework for the automated update function. This will be very simialr to the Load function above
+// and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
+// ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
+//function massDataUpdate(dbCred){}
+module.exports = {massDataLoad, deleteData, addToDB, searchURL};
