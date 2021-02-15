@@ -45,8 +45,8 @@ app.get('/massDataLoad', (request,response) => {
 });
 app.get('/addToDB', (request,response) => {
     testDocRef.set({
-        name: 'greg',
-        age: 22,
+        name: 'reina',
+        age: 20,
     });
     response.send('Added data to the db hopefully');
 });

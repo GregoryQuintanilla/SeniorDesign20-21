@@ -14,7 +14,38 @@ chrome.runtime.onInstalled.addListener(function() {
                 actions: [new chrome.declarativeContent.ShowPageAction()]
         }]);
     });
-});
+
+    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        var url = "";
+    
+        // get the url everytime the user changes url
+        chrome.tabs.query({active: true, lastFocusedWindow: true},tabs =>{
+            url = tabs[0].url;
+    
+            var bkg = chrome.extension.getBackgroundPage();
+
+            if (url != undefined){ // not a new tab with no url
+                bkg.console.log(url); // for testing, send URL to node server??
+
+                // Gets the source code of the website
+                fetch(url).then(function (response) { // The API call was successful!
+                    mode: 'no-cors'
+                    return response.text();
+            
+                }).then(function (html) {
+                    var bkg = chrome.extension.getBackgroundPage();
+                    bkg.console.log(html); // testing
+            
+                }).catch(function (err) { // There was an error
+                    console.warn('Something went wrong.', err);
+                });
+            }
+        }); // chrome.tabs.query
+
+    });  // chrome.tabs.onUpdated
+
+}); // chrome.runtime.onInstalled
+
 /*chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab)
 {
     if (changeInfo.status == 'complete'){
