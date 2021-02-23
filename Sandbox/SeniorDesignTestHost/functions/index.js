@@ -37,14 +37,14 @@ app.get('/massDataLoad', (request,response) => {
     // Signal to trigger the back end DB loading.
     var data = processing.massDataLoad(firestoreDB); // make this async at some point? We don't need this to wait for the system to return back
 
-    console.log(data)
+    //console.log(data)
     console.log("Called function");
 
     response.send("hopefully data is mass loaded. idk.")
 });
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    processing.deleteData(firestoreDB);
+    processing.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
     response.send("Deleted code specified entries");
 })
 app.get('/addToDB', (request,response) => {
@@ -59,7 +59,11 @@ app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
     var positive = processing.searchURL(firestoreDB,"http://pt-o.top/awb.html");
     var negative = processing.searchURL(firestoreDB,"http://www.google.com");
-    response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
+    console.log("SENDING RESPONSE??");
+    positive.then(answer => {
+        response.send(answer);
+    });
+    //response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
 })
 
 // Test Function to see how interacting with external js files works.

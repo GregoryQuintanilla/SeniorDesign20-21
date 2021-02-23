@@ -36,8 +36,12 @@
 // --- My Preference but it won't kill me if y'all disagree ---
 // since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-// TODO
-function deleteData(dbCred){
+
+// Deletes a data entry by url
+// dbCred - admin.firestore() object - the object to the firestore you wan tot access
+// URL - string - is the desired URL to be found and removed. 
+// returns nothing to the browser.
+function deleteData(dbCred, URL){
    // How do we want to go about how we will delete data?
    // When will we delete data?
    // Who triggers these deletions? Server most likely.
@@ -55,18 +59,42 @@ function deleteData(dbCred){
    // all function that return promises return them immediately, most likely in the pending state and we need to use that same promise
    // object to wait for it to be fullfilled. 
    // Most of them have some .then that can be made to handle when the promise if finished.
-   var coll = dbCred.collection('test1').get(); // gets a snapshot of the collection
+
+   if(typeof(URL) != "string"){
+       return 0;
+   }
+
+   var search = searchURL(dbCred,URL);
+
+   search.then(answer =>{
+       console.log(answer);
+       if(answer != -1){
+           var coll = dbCred.collection('test1').doc(answer) //.delete(); // gets a snapshot of the collection
+           console.log(coll);
+       }
+   })
+   // TODO Check if valid firestore reference is passed
 
    // accessing each of the docs
+   // no signal needs to be sent back to the extension of a successful deletion, this is all our own info
+   
+   /* 
    coll.then(query =>{
        var documents = query.docs
 
-       documents.forEach(doc => {
+       for(i =0; i < documents.length; i++){
+           var doc = documents[i];
            console.log(doc.id);
-           console.log(doc.data());
-       });
+
+           if(doc.data().url == URL){
+               return 1;
+           }
+
+       }
        return 0;
    });
+   */
+   
 
 
    /*
@@ -86,24 +114,40 @@ function deleteData(dbCred){
        console.log("didint find the doc");
    }
    */
-   return 0;
+   return 1;
 }
 //TODO
 // a few different type of search functions for different systems. By URL will probably be the first one because of the nature
 // of the extenstion
 function searchURL(dbCred, curURL){
+    if(typeof(curURL) != "string"){
+        return 0;
+    }
+
+    // TODO - param check on dbCred
+
+
     // encountering lots of promises wonky-ness
+    // return the id??
     var URLCollection_promise = dbCred.collection("test1").get();
     var result = URLCollection_promise.then(query => {
         var documents = query.docs;
         var match = 0;
+        for(i = 0; i < documents.length; i++){
+            console.log(documents[i].id);
+            console.log(documents[i].data().url)
+            if(documents[i].data().url == curURL){
+                return documents[i].id;
+            }
+        }
+        /*
         documents.forEach(doc => {
             if(doc.data().url == curURL){
                match = 1
             }
         });
-        console.log(curURL + " " + String(match));
-        return match;
+        */
+        return -1;
     });
     console.log(result);
     return result;
@@ -115,6 +159,12 @@ function searchURL(dbCred, curURL){
 // currently traverses to the .json data and requests it. taking that object it is loaded into the cloud firestore
 // dbCred = the credentials of the cloud firestore. Currently this function is called from index.js of the node and passed the admin.firestore() credentials
 function addToDB(dbCred, malURL){
+    if(typeof(malURL) != "string"){
+        return 0;
+    }
+
+    // TODO param check on dbcred
+
     var urlCollection = dbCred.collection("test1") // update collection name once the depoy DB is determined
     
     urlCollection.doc().set({
@@ -137,15 +187,22 @@ function massDataLoad(dbCred){
                 var newLocationReq = new XMLHttpRequest();
                 newLocationReq.open("GET",newLocation,false);
                 // Each element in the data array is an entry of the phish tank DB
-                newLocationReq.onload = function () {
-                    console.log("New Request Sent & Recieved");
 
-                    var coll = dbCred.collection("test1")
-                    
+                newLocationReq.onload = function () {
+                    var coll = dbCred.collection("test1");
                     var data = JSON.parse(newLocationReq.responseText);
                     for (i = 0; i<3; i++){
-                        var curURL = data[i].url;
-                        console.log(curURL);
+                        /**
+                         * So ran into an issue. firestore ID's can't have / (forward slashses) in them so the url id is out
+                         * because replacing them is 1) extra formatting and overhead on our part. 2) no way to guarentee that our
+                         * new process is 100%. Whatever character we replace it with or whatever can still show up normally and then
+                         * break the url.
+                         * 
+                         * Maybe just split it into an arry on / chars? but still run into overhead and this may come around to bite
+                         * us in the ass for the timing issues.
+                         * 
+                         * Mainting our own indexing may have to be the solution. It may have the least search performance impacts.
+                         */
                         // leaving .doc() blank has firestore auto-generate the ids
                             // easy and automated
                             // will degrade search performance
@@ -155,9 +212,40 @@ function massDataLoad(dbCred){
                         // we could track our own id #'s
                             // again will cause search degredation
                             // our own system though and will require a bit more management.
-                        coll.doc().set({
-                            url: curURL
-                        })
+                        
+                        coll.doc(i).set({
+                            url: curURL,
+                        });
+                    }
+                }
+                newLocationReq.send(null);
+       }; 
+    }
+
+   phishTankReq.send(null);
+   //return phishTankReq;
+}
+function massDataUpdate(dbCred){
+   var phishTankReq = new XMLHttpRequest();
+   phishTankReq.open("GET","https://data.phishtank.com/data/online-valid.json", false);
+   phishTankReq.onload = function (){
+           if(phishTankReq.status == 302){
+                //Acquire the temporary location of the requested file.
+                var newLocation = phishTankReq.getResponseHeader("location");
+
+                // Hopefully we have the correct URL for the moved address of the .json file
+
+                var newLocationReq = new XMLHttpRequest();
+                newLocationReq.open("GET",newLocation,false);
+                // Each element in the data array is an entry of the phish tank DB
+
+                newLocationReq.onload = function () {
+                    var coll = dbCred.collection("test1");
+                    var data = JSON.parse(newLocationReq.responseText);
+                    for (i = 0; i<3; i++){
+                        coll.doc(i).set({
+                            url: curURL,
+                        }) 
                     }
                 }
                 newLocationReq.send(null);
