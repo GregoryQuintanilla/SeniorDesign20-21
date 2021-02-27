@@ -92,4 +92,84 @@ function massDataLoad(){
    phishTankReq.send(null);
    //return phishTankReq;
 }
-module.exports = {test,test2, massDataLoad};
+
+function getSourceCode(url){
+    // Retrieves the source code of a site from its URL
+    const fetch = require('node-fetch');
+
+    var result = fetch(url).then(function (response) { // The API call was successful!
+        mode: 'no-cors'
+        return response.text();
+
+    }).then(function (html) { //return source code retrieved from url
+        return html;
+
+    }).catch(function (err) { // There was an error
+        console.warn('Something went wrong in getSourceCode().', err);
+    });
+    
+    return result; // return entire source code
+}
+
+function inputFields(sourceCode){
+    // Checks for specific types if input fields in code common to phishing sites
+    var count = 0;
+
+    count += (sourceCode.match(/type="text"/g) || []).length;
+    count += (sourceCode.match(/type="email"/g) || []).length;
+    count += (sourceCode.match(/type="password"/g) || []).length;
+    count += (sourceCode.match(/type="number"/g) || []).length;
+    count += (sourceCode.match(/type="submit"/g) || []).length;
+    count += (sourceCode.match(/<form/g) || []).length;
+
+    return count;
+}
+
+function urlContainsIP(siteLink){ 
+    // Checks if a URL contains an IP address
+    return (siteLink.match(/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g) != null);
+ };
+
+function urlContainsSSL(siteLink){ // checks whether the site contains an SSL certificate
+    const splitStr = siteLink.split('/');   //Split the url
+    
+    return splitStr[0].includes("https");
+}
+
+function keyPhrases(sourceCode){
+    // Checks for alarming key words often used in phishing sites
+    var count = 0;
+
+    sourceCode = "dlsdksld claim now, for free Urgent lol";
+
+    count += (sourceCode.match(/[U|u]rgent/g) || []).length;
+    count += (sourceCode.match(/!!/g) || []).length;
+    count += (sourceCode.match(/[D|d]elivery [A|a]ttempt/g) || []).length;
+    count += (sourceCode.match(/[A|a]ct [N|n]ow/g) || []).length;
+    count += (sourceCode.match(/[C|c]laim [N|n]ow/g) || []).length;
+    count += (sourceCode.match(/[F|f]ree/g) || []).length;
+    count += (sourceCode.match(/[W|w]inner/g) || []).length;
+    count += (sourceCode.match(/[S|s]ocial [S|s]ecurity/g) || []).length;
+
+    console.log(count);
+
+    return count;
+}
+
+function urlPeriodAmt(siteLink){ // checks whether the site url contains periods
+    var count = siteLink.split(".").length - 1;
+    
+    return count;
+ };
+
+function urlContainsAt(siteLink){ // checks whether the site contains an "@"
+    return siteLink.includes("@");
+}
+
+function urlDashesAmt(siteLink){ // checks whether the site url contains periods
+    var count = siteLink.split("-").length - 1;
+    
+    return count;
+ };
+
+module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases};

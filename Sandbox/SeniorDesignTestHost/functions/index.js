@@ -68,6 +68,53 @@ app.get('/timestamp-cached',(request, response) => {
     response.send(`${Date.now()}`);
 });
 
+app.get('/getSourceCode', (request, response) => {
+    // displays entire source code of a site
+    var url = request.query.link;
+
+        if(request.query.link == undefined || request.query.link == "") {
+            //no link, do nothing
+            response.send("URL cannot be undefined");
+
+        } else {
+            var code = processing.getSourceCode(url);
+
+            code.then(result => {
+                var src = "Retrieving source code for: " + url + " <br><br>"+ result.replace(/[<]/g, "<'"); // convert source code to prevent browser from rendering
+
+                response.send(src);
+
+            }).catch(err => {
+                console.warn('Something went wrong in /getSourceCode route.', err);
+             });
+        }
+});
+
+app.get('/numInputFields', (request, response) => {
+    // displays the number of input fields found in the source code of a site
+    var url = request.query.link;
+
+        if(request.query.link == undefined || request.query.link == "") {
+            //no link, do nothing
+            response.send("URL cannot be undefined");
+
+        } else {
+            var code = processing.getSourceCode(url);
+
+            code.then(result => {
+                var count = processing.inputFields(result);
+
+                // var src = "Website: " + url + " has " + count + " input fields." + " <br><br>" + result.replace(/[<]/g, "<'"); 
+                var src = "Website: " + url + " has " + count + " input fields."; 
+
+                response.send(src);
+
+            }).catch(err => {
+                console.warn('Something went wrong in /numInputFields route.', err);
+             });
+        }
+});
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
