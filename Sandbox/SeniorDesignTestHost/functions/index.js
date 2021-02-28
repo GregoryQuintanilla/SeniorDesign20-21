@@ -8,6 +8,8 @@ const firestoreDB = admin.firestore();
 
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
+
+const databasefuncs = require("./tools/databasefuncs.js"); // this is the databasefunction js file. The String needs to be the path to the file.
 const processing = require("./processing.js"); // this is the processing js file. The String needs to be the path to the file.
 const https = require('https');
 const url = require('url');
@@ -37,15 +39,19 @@ app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
 
     console.log("callinng function");
-
     // Signal to trigger the back end DB loading.
-    var data = processing.massDataLoad(); // make this async at some point? We don't need this to wait for the system to return back
+    var data = databasefuncs.massDataLoad(firestoreDB); // make this async at some point? We don't need this to wait for the system to return back
 
-    console.log(data)
+    //console.log(data)
     console.log("Called function");
 
     response.send("hopefully data is mass loaded. idk.")
 });
+app.get('/del', (request, response) => {
+    response.set('Access-Control-Allow-Origin','*');
+    databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    response.send("Deleted code specified entries");
+})
 app.get('/addToDB', (request,response) => {
     testDocRef.doc('greg').set({
         name: 'greg',
@@ -54,13 +60,18 @@ app.get('/addToDB', (request,response) => {
     response.send('Added data to the db hopefully');
 });
 
+app.get('/findURL', (request, response) => {
+    response.set('Access-Control-Allow-Origin','*');
+    var positive = databasefuncs.searchURL(firestoreDB,"http://pt-o.top/awb.html");
+    var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
+    console.log("SENDING RESPONSE??");
+    positive.then(answer => {
+        response.send(answer);
+    });
+    //response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
+})
+
 // Test Function to see how interacting with external js files works.
-app.get('/testExternalFunctions', (request,response) => {
-    console.log(processing);
-    processing.test();
-    processing.test2();
-    response.send("Sucess!")
-});
 
 app.get('/domainAge', (request, response) => {
     var URL = "google.com";
