@@ -6,12 +6,17 @@ const db = admin.firestore();
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
 const processing = require("./processing.js"); // this is the processing js file. The String needs to be the path to the file.
+const https = require('https');
+const url = require('url');
 
 
 
 
 
-const testDocRef = db.collection('dummies').doc('URLs');
+
+
+
+const testDocRef = db.collection('dummies');
 app.get('/',(request, response) =>{
     // This is a fun important piece. Since we are the owners of the server we can do whatever the hell we want and accept request from whatever hosts. I reccommend
     // being atleast familiar with what Cross Origin Resource Sharing (CORS) is and the "idea" behind it. It is a pain in the neck for devs because it is enforced by
@@ -23,7 +28,7 @@ app.get('/',(request, response) =>{
     //now that we can have the browser talk to the server (!!!) this is where just straight dev comes in. Time to play around
 })
 app.get('/addToDB', (request,response) => {
-    testDocRef.set({
+    testDocRef.doc('greg').set({
         name: 'greg',
         age: 22,
     });
@@ -38,22 +43,34 @@ app.get('/testExternalFunctions', (request,response) => {
     response.send("Sucess!")
 });
 
+app.get('/domainAge', (request, response) => {
+    var URL = "google.com";
+    var domainAge = processing.checkDomainAge(URL);
+    response.send(domainAge);
+});
+
+app.get('/getData', (request,response) => {
+    const doc = testDocRef.doc('john').get();
+    if (!doc.exists) {
+        console.log('No such document!');
+    } else {
+        console.log('Document data:', doc.data());
+    }
+    console.log('Document data:', doc.data());
+    response.send('Hit API');
+});
+
 app.get('/reportLink', (request, response) => {
-    var URL = request.query.link;
-    // Validate URL here before adding to DB:
+    // Generate URL object
+    const givenURL = new URL(request.query.link);
 
     // Add document for URL
-    /*testDocRef.set({
-        id: 0,
-        url: 'https://www.example.com/',
-        online: 'yes'
-    });*/
-
+    testDocRef.doc('urlTest').set({
+        url: `${givenURL}`,
+        online: 'true'
+    });
     // If valid
-    response.send(`Added ${URL} to database.`);
-
-    // If invalid
-    //response.send(Error adding website to database.);
+    response.send(`Added ${givenURL} to database.`);
 });
 
 app.get('/timestamp', (request, response) => {

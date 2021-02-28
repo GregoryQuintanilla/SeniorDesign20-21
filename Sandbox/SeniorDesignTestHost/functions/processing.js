@@ -34,6 +34,15 @@
 
 
 // My Preference but it won't kill me if y'all disagree
+
+const https = require('https');
+const options = {
+    hostname: '',
+    port: 443,
+    path:  '/',
+    method: 'GET'
+};
+
 function test(){
     console.log("This is a test function from an external js file.")
 }
@@ -42,4 +51,32 @@ function test2(){
     console.log("This is the SECOND functio to test how the exporting works really.")
 }
 
-module.exports = {test,test2};
+// Expects a domain to be passed and will return the age of the domain.
+function checkDomainAge(domain){
+    var api = `https://api.ip2whois.com/v1?key=4LIWHQR89M9U6P8VXRPUI2HTX2X4OXAJ&domain=${domain}`; // API URL
+    var age, createDate, updateDate;
+    // Perform an HTTPS get request on the api url
+    https.get(`${api}`, resp => {
+        let data = "";
+        resp.on("data", chunk => {
+            data += chunk;
+        });
+        resp.on("end", () => {
+            // Grab domain age
+            age = JSON.parse(data).domain_age;
+            console.log(age);
+            // Grab domain creation date
+            createDate = JSON.parse(data).create_date;
+            console.log(createDate);
+            // Grab domain update date
+            updateDate = JSON.parse(data).update_date;
+            console.log(updateDate);
+        });
+    })
+    .on("error", err => {
+        console.log("Error: " + err.message);
+    });
+    return age;
+}
+
+module.exports = {test, test2, checkDomainAge};
