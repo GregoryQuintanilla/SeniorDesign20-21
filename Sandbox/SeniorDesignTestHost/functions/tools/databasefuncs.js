@@ -1,64 +1,17 @@
-/**  
- * This way I think it will be easier to organize the logic of our functions and process. index.js will be used more as the routing and interface
- * between these functions and the https calls to the server. 
- * 
- * This will begin to feel like what our "API" will look like. There are a few different forms the export can be created. I like this method 
- * better. I think it's easier this way for structure. There are some other ways I have seen that package and send ALL function written, but this
- * way we only give the NodeJS route access to the ones we want it to have.
- * 
- * The below also accomplish the goal and in the end it's semantic and oraganization. All of them complete the same goals. 
-*/
-
-/** Method to send all inside a method.
- *  var methods = {
- *      test : function(){
- *                  console.log("this is a test function")l               
- *              } 
- *      test2 : function() {
- *                  console.log("this is a SECOND test function");     
- *              } 
- *  };
- * module.exports = methods
- * 
- * OR ------
- * 
- *  var methods = {}
- *  methods.test = function(){
- *                      console.log("this is a test function");
- *                  }
- *  ...
- * 
- *  module.exports = methods
- */
-
-
-
-// --- My Preference but it won't kill me if y'all disagree ---
 // since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
-// Deletes a data entry by url
-// dbCred - admin.firestore() object - the object to the firestore you wan tot access
-// URL - string - is the desired URL to be found and removed. 
-// returns nothing to the browser.
+/** Deletes a data entry by url
+ * dbCred - admin.firestore() object - the object to the firestore you wan tot access
+ * URL - string - is the desired URL to be found and removed. 
+ * returns nothing to the browser.
+ */
 function deleteData(dbCred, URL){
    // How do we want to go about how we will delete data?
    // When will we delete data?
    // Who triggers these deletions? Server most likely.
    // Any manual deletions?
    // We can do by url/ID
-
-   // We are encountering promises!
-   // for a solid youtube video about them from google specifically:
-   // https://www.youtube.com/watch?v=7IkUgCLr5oA
-   //
-   // essentially Promises are an object that says some async work is being done in the backgroud. they have 3 states:
-   // Pending - the work is currently being done
-   // fullfilled - the work has completed
-   // rejected - the work was unable to finish
-   // all function that return promises return them immediately, most likely in the pending state and we need to use that same promise
-   // object to wait for it to be fullfilled. 
-   // Most of them have some .then that can be made to handle when the promise if finished.
 
    if(typeof(URL) != "string"){
        return 0;
@@ -72,53 +25,18 @@ function deleteData(dbCred, URL){
            var coll = dbCred.collection('test1').doc(answer) //.delete(); // gets a snapshot of the collection
            console.log(coll);
        }
-   })
-   // TODO Check if valid firestore reference is passed
-
-   // accessing each of the docs
-   // no signal needs to be sent back to the extension of a successful deletion, this is all our own info
-   
-   /* 
-   coll.then(query =>{
-       var documents = query.docs
-
-       for(i =0; i < documents.length; i++){
-           var doc = documents[i];
-           console.log(doc.id);
-
-           if(doc.data().url == URL){
-               return 1;
-           }
-
-       }
-       return 0;
+   }).catch(err => {
+       console.log(err);
+       console.log("An Error Occured");
    });
-   */
-   
-
-
-   /*
-   if(mydoc){
-       console.log("Found a doc?");
-       console.log(mydoc);
-       console.log(mydoc.id);
-       // some async work ad process of getting the data from a document.
-       var docData = mydoc.get();
-       docData.then(snapshot => {
-           console.log(snapshot);
-           console.log(snapshot.data())
-           return 0;
-       })
-   }
-   else{
-       console.log("didint find the doc");
-   }
-   */
+   // TODO Check if valid firestore reference is passed
    return 1;
 }
+
 //TODO
 // a few different type of search functions for different systems. By URL will probably be the first one because of the nature
 // of the extenstion
+
 function searchURL(dbCred, curURL){
     if(typeof(curURL) != "string"){
         return 0;
@@ -140,15 +58,12 @@ function searchURL(dbCred, curURL){
                 return documents[i].id;
             }
         }
-        /*
-        documents.forEach(doc => {
-            if(doc.data().url == curURL){
-               match = 1
-            }
-        });
-        */
         return -1;
+    }).catch(err =>{
+        console.log("There was an error in searchURL");
+        console.log(err);
     });
+
     console.log(result);
     return result;
     

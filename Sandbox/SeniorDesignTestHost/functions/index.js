@@ -8,7 +8,7 @@ const firestoreDB = admin.firestore();
 
 const express = require('express'); // for node app
 const app = express(); // for make node app and express app
-const processing = require("./tools/databasefuncs.js"); // this is the processing js file. The String needs to be the path to the file.
+const databasefuncs = require("./tools/databasefuncs.js"); // this is the databasefunction js file. The String needs to be the path to the file.
 
 
 const testDocRef = firestoreDB.collection('dummies').doc('greg');
@@ -35,7 +35,7 @@ app.get('/massDataLoad', (request,response) => {
 
     console.log("callinng function");
     // Signal to trigger the back end DB loading.
-    var data = processing.massDataLoad(firestoreDB); // make this async at some point? We don't need this to wait for the system to return back
+    var data = databasefuncs.massDataLoad(firestoreDB); // make this async at some point? We don't need this to wait for the system to return back
 
     //console.log(data)
     console.log("Called function");
@@ -44,7 +44,7 @@ app.get('/massDataLoad', (request,response) => {
 });
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    processing.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
     response.send("Deleted code specified entries");
 })
 app.get('/addToDB', (request,response) => {
@@ -57,8 +57,8 @@ app.get('/addToDB', (request,response) => {
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    var positive = processing.searchURL(firestoreDB,"http://pt-o.top/awb.html");
-    var negative = processing.searchURL(firestoreDB,"http://www.google.com");
+    var positive = databasefuncs.searchURL(firestoreDB,"http://pt-o.top/awb.html");
+    var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
     console.log("SENDING RESPONSE??");
     positive.then(answer => {
         response.send(answer);
@@ -67,12 +67,6 @@ app.get('/findURL', (request, response) => {
 })
 
 // Test Function to see how interacting with external js files works.
-app.get('/testExternalFunctions', (request,response) => {
-    console.log(processing);
-    processing.test();
-    processing.test2();
-    response.send("Sucess!")
-});
 
 app.get('/timestamp', (request, response) => {
     response.send(`${Date.now()}`);
