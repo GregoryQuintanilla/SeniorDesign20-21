@@ -31,9 +31,14 @@
  *  module.exports = methods
  */
 
+const https = require('https');
+const options = {
+    hostname: '',
+    port: 443,
+    path:  '/',
+    method: 'GET'
+};
 
-
-// --- My Preference but it won't kill me if y'all disagree ---
 // since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -91,6 +96,34 @@ function massDataLoad(){
 
    phishTankReq.send(null);
    //return phishTankReq;
+}
+
+// Expects a domain to be passed and will return the age of the domain.
+function checkDomainAge(domain){
+    var api = `https://api.ip2whois.com/v1?key=4LIWHQR89M9U6P8VXRPUI2HTX2X4OXAJ&domain=${domain}`; // API URL
+    var age, createDate, updateDate;
+    // Perform an HTTPS get request on the api url
+    https.get(`${api}`, resp => {
+        let data = "";
+        resp.on("data", chunk => {
+            data += chunk;
+        });
+        resp.on("end", () => {
+            // Grab domain age
+            age = JSON.parse(data).domain_age;
+            console.log(age);
+            // Grab domain creation date
+            createDate = JSON.parse(data).create_date;
+            console.log(createDate);
+            // Grab domain update date
+            updateDate = JSON.parse(data).update_date;
+            console.log(updateDate);
+        });
+    })
+    .on("error", err => {
+        console.log("Error: " + err.message);
+    });
+    return age;
 }
 
 function getSourceCode(url){
@@ -172,4 +205,4 @@ function urlDashesAmt(siteLink){ // checks whether the site url contains periods
     return count;
  };
 
-module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases};
+module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases, checkDomainAge};
