@@ -13,7 +13,7 @@ const https = require('https');
 const url = require('url');
 
 
-const testDocRef = db.collection('dummies');
+const testDocRef = firestoreDB.collection('dummies');
 
 app.get('/',(request, response) =>{
     // This is a fun important piece. Since we are the owners of the server we can do whatever the hell we want and accept request from whatever hosts. I reccommend
