@@ -1,3 +1,10 @@
 {
+  "hosting": {
+    "public": "functions/public",
+    "rewrites": [{
+      "source": "/timestamp",
+      "function": "app"
+    }]
+  },
   "rulesFile": "database.rules.json"
 }
