@@ -53,10 +53,7 @@ app.get('/del', (request, response) => {
     response.send("Deleted code specified entries");
 })
 app.get('/addToDB', (request,response) => {
-    testDocRef.doc('greg').set({
-        name: 'greg',
-        age: 22,
-    });
+    databasefuncs.addToDB(firestoreDB,"https://www.centraleconsulta.net/index2.php");
     response.send('Added data to the db hopefully');
 });
 

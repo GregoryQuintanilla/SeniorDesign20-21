@@ -22,8 +22,7 @@ function deleteData(dbCred, URL){
    search.then(answer =>{
        console.log(answer);
        if(answer != -1){
-           var coll = dbCred.collection('test1').doc(answer) //.delete(); // gets a snapshot of the collection
-           console.log(coll);
+           var coll = dbCred.collection('test1').doc(answer).delete(); // gets a snapshot of the collection
        }
    }).catch(err => {
        console.log(err);
