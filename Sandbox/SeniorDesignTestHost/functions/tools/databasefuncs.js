@@ -20,9 +20,9 @@ function deleteData(dbCred, URL){
    var search = searchURL(dbCred,URL);
 
    search.then(answer =>{
-       console.log(answer);
+       console.log("Id of URL to delete " + String(answer));
        if(answer != -1){
-           var coll = dbCred.collection('test1').doc(answer).delete(); // gets a snapshot of the collection
+           dbCred.collection('test1').doc(answer).delete(); // gets a snapshot of the collection
        }
    }).catch(err => {
        console.log(err);
@@ -51,8 +51,8 @@ function searchURL(dbCred, curURL){
         var documents = query.docs;
         var match = 0;
         for(i = 0; i < documents.length; i++){
-            console.log(documents[i].id);
-            console.log(documents[i].data().url)
+            console.log("current URL: " + documents[i].data().url)
+            console.log("URL in question " + curURL);
             if(documents[i].data().url == curURL){
                 return documents[i].id;
             }
@@ -63,7 +63,7 @@ function searchURL(dbCred, curURL){
         console.log(err);
     });
 
-    console.log(result);
+    console.log("SearchURL result " + String(result));
     return result;
     
 }
@@ -78,12 +78,24 @@ function addToDB(dbCred, malURL){
     }
 
     // TODO param check on dbcred
+    var search = searchURL(dbRec,malURL);
+    search.then(answer =>{
+        if(answer == -1){
+            var urlCollection = dbCred.collection("test1");
 
-    var urlCollection = dbCred.collection("test1") // update collection name once the depoy DB is determined
-    
-    urlCollection.doc().set({
-        url: malURL
+            urlCollection.doc().set({
+                url: malURL
+            })
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }).catch(err =>{
+        console.log("There was an error in addToDB");
+        return err;
     })
+    return search;
 }
 function massDataLoad(dbCred){
    // Is ready, just adjust the for loop to do all data.
