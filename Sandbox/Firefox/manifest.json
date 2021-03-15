@@ -1,18 +1,31 @@
 {
-   "manifest_version": 2,
-   "name": "Borderify",
-   "version": "1.0",
-
-   "description": "Adds a red border to all webpages matching mozilla.org.",
-
-   "icons":{
-        "48": "icons/Jeffreys.jfif"
-    },
-
-    "content_scripts":[
-        {
-            "matches":["*://*.mozilla.org/*"],
-            "js":["borderify.js"]
+    "name": "Getting Started Example",
+    "version": "1.0",
+    "description": "Building an Extenstion!",
+    "permissions": [ 
+        "activeTab", 
+        "storage",
+        "https://www.google.com/",
+        "https://*/",
+        "https://localhost:5000/toServer" 
+    ],
+	"options_ui": {
+		"page": "options.html"
+	},
+    "browser_action": {
+        "default_popup": "Home.html",
+        "default_icon": {
+            "16": "./Images/Logo.png",
+            "32": "./Images/Logo.png",
+            "48": "./Images/Logo.png",
+            "128": "./Images/Logo.png"
         }
-    ]
+    },
+    "icons": {
+        "16": "./Images/Logo.png",
+        "32": "./Images/Logo.png",
+        "48": "./Images/Logo.png",
+        "128": "./Images/Logo.png"
+    },
+    "manifest_version":2
 }
