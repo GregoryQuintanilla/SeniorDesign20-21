@@ -78,7 +78,7 @@ function addToDB(dbCred, malURL){
     }
 
     // TODO param check on dbcred
-    var search = searchURL(dbRec,malURL);
+    var search = searchURL(dbCred,malURL);
     search.then(answer =>{
         if(answer == -1){
             var urlCollection = dbCred.collection("test1");
