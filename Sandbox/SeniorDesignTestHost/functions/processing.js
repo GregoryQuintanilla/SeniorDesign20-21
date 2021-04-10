@@ -138,7 +138,7 @@ function getSourceCode(url){
         return html;
 
     }).catch(function (err) { // There was an error
-        console.warn('Something went wrong in getSourceCode().', err);
+        return err;
     });
     
     return result; // return entire source code
@@ -165,7 +165,7 @@ function urlContainsIP(siteLink){
 
 function urlContainsSSL(siteLink){ // checks whether the site contains an SSL certificate
     const splitStr = siteLink.split('/');   //Split the url
-    
+    console.log(splitStr);
     return splitStr[0].includes("https");
 }
 
@@ -173,7 +173,7 @@ function keyPhrases(sourceCode){
     // Checks for alarming key words often used in phishing sites
     var count = 0;
 
-    sourceCode = "dlsdksld claim now, for free Urgent lol";
+    //sourceCode = "dlsdksld claim now, for free Urgent lol";
 
     count += (sourceCode.match(/[U|u]rgent/g) || []).length;
     count += (sourceCode.match(/!!/g) || []).length;
@@ -196,7 +196,11 @@ function urlPeriodAmt(siteLink){ // checks whether the site url contains periods
  };
 
 function urlContainsAt(siteLink){ // checks whether the site contains an "@"
-    return siteLink.includes("@");
+    const splitStr = siteLink.split('/');
+
+    if (splitStr[2].includes("@")) return true;
+
+    return false;
 }
 
 function urlDashesAmt(siteLink){ // checks whether the site url contains periods
