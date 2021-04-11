@@ -46,7 +46,7 @@ function searchURL(dbCred, curURL){
 
     // encountering lots of promises wonky-ness
     // return the id??
-    var URLCollection_promise = dbCred.collection("test1").get();
+    var URLCollection_promise = dbCred.collection("MaliciousSites").get();
     var result = URLCollection_promise.then(query => {
         var documents = query.docs;
         var match = 0;
