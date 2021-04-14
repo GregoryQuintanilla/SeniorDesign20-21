@@ -35,6 +35,7 @@ app.get('/addToRealTimeDB',(request,response) =>{
     });*/
     response.send(admin.auth().app);
 });
+
 app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
 
@@ -47,6 +48,7 @@ app.get('/massDataLoad', (request,response) => {
 
     response.send("hopefully data is mass loaded. idk.")
 });
+
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
     databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");

@@ -36,9 +36,11 @@ function deleteData(dbCred, URL){
 // a few different type of search functions for different systems. By URL will probably be the first one because of the nature
 // of the extenstion
 
+// MAY ADJUST THIS CODE SO WE HAVE A BASE DB SEARCH FUNCTION then make searchURL just a specific call of search.
+// We could then also reuse the same function for admin stuff.
 function searchURL(dbCred, curURL){
     if(typeof(curURL) != "string"){
-        return 0;
+        return -1;
     }
 
     // TODO - param check on dbCred
@@ -49,10 +51,8 @@ function searchURL(dbCred, curURL){
     var URLCollection_promise = dbCred.collection("test1").get();
     var result = URLCollection_promise.then(query => {
         var documents = query.docs;
-        var match = 0;
+
         for(i = 0; i < documents.length; i++){
-            console.log("current URL: " + documents[i].data().url)
-            console.log("URL in question " + curURL);
             if(documents[i].data().url == curURL){
                 return documents[i].id;
             }
@@ -63,7 +63,36 @@ function searchURL(dbCred, curURL){
         console.log(err);
     });
 
-    console.log("SearchURL result " + String(result));
+    return result;
+    
+}
+// http://hostpoint-admin-panel52358.web65.s177.goserver.host/hostpoint/index.html
+// last doc in firebase old version
+function searchURL2(dbCred, curURL){
+    if(typeof(curURL) != "string"){
+        return -1;
+    }
+
+    // TODO - param check on dbCred
+
+
+    // encountering lots of promises wonky-ness
+    // return the id??
+    var URLCollection_promise = dbCred.collection("test1").doc(curURL);
+    var result = URLCollection_promise.then(query => {
+        var documents = query.docs;
+
+        for(i = 0; i < documents.length; i++){
+            if(documents[i].data().url == curURL){
+                return documents[i].id;
+            }
+        }
+        return -1;
+    }).catch(err =>{
+        console.log("There was an error in searchURL");
+        console.log(err);
+    });
+
     return result;
     
 }
@@ -78,7 +107,7 @@ function addToDB(dbCred, malURL){
     }
 
     // TODO param check on dbcred
-    var search = searchURL(dbRec,malURL);
+    var search = searchURL(dbCred,malURL);
     search.then(answer =>{
         if(answer == -1){
             var urlCollection = dbCred.collection("test1");
@@ -97,6 +126,77 @@ function addToDB(dbCred, malURL){
     })
     return search;
 }
+function documentAdd(collection,url,host){
+    collection.doc(host)
+    .get()
+    .then(document =>{
+        //console.log(document.id);
+        //console.log(host);
+        //console.log(url);
+        
+        if(document.exists){
+            //console.log("document data: ", document.data());
+            var arr = document.data().urls
+            if(!arr.find(url)){
+                //console.log("urls Array", arr);
+                //console.log("Can I add things to this array?");
+                arr.push(url);
+                //console.log("new array???? ", arr);
+                console.log(arr);
+                collection.doc(document.id).set({
+                    urls: arr,
+                })
+            }
+            else{
+                console.log("this url already exists in the given host");
+            }
+        }
+        else{
+            console.log("Document doesn't Exist")
+            collection.doc(document.id).set({
+                urls: [url],
+            });
+        }
+    })
+    .catch(error => {
+        console.log(error)
+    })
+}
+// a .then() function used in the addition of a document into our database.
+// url = the full url currently being added.
+// parsedURL = the host of the url for nesting within out collection
+// document = the documentsnapshot (if it exists) being checked.
+function documentAdd_then(collection, url, host, document){
+    //console.log("does this doc exist? ", document.exists);
+    console.log(document.id);
+    //console.log(document.data());
+    console.log("did we pass the correct URL? ", url.toString());
+    console.log("Did the hostparse also come along? ", host);
+    
+
+    /*
+    if(document.exists){
+        //console.log("document data: ", document.data());
+        var arr = document.data().urls
+        //console.log("urls Array", arr);
+        //console.log("Can I add things to this array?");
+        arr.push("another thingy please");
+        //console.log("new array???? ", arr);
+        console.log(arr);
+        collection.doc(document.id).set({
+            urls: arr,
+        })
+    }
+    else{
+        console.log("Document doesn't Exist")
+        collection.doc(document.id).set({
+            urls: [url],
+        });
+    }
+    */
+    return 0;
+}
+
 function massDataLoad(dbCred){
    // Is ready, just adjust the for loop to do all data.
    console.log("Loadphish tank database...");
@@ -114,10 +214,29 @@ function massDataLoad(dbCred){
                 newLocationReq.open("GET",newLocation,false);
                 // Each element in the data array is an entry of the phish tank DB
 
-                newLocationReq.onload = function () {
-                    var coll = dbCred.collection("test1");
+                newLocationReq.onload = function() {
+                    var coll = dbCred.collection("MaliciousSites2");
                     var data = JSON.parse(newLocationReq.responseText);
-                    for (i = 0; i<3; i++){
+                    //console.log(data.length);
+                    for (i = 0; i<10; i++){
+                        curURL = data[i].url;
+                        
+                        //need to parse url to base hostsite.
+                        var firstSlash = curURL.indexOf('/');
+                        var hostStart = firstSlash+2;
+                        var endOfHost = curURL.indexOf('/',hostStart);
+                        var hostParse = curURL.slice(hostStart,endOfHost);
+                        // Check if already duplicate?
+                        console.log("url in MDL: ",curURL);
+                        console.log("host in MDL: ", hostParse);
+                        documentAdd(coll,curURL,hostParse);
+                        /*
+                        coll.doc(hostParse).get()
+                        .then(  document => documentAdd_then(coll, data[i].url, i ,document) )
+                        .catch( error =>{
+                            console.log(error);
+                            console.log("An Error Occured in the Promise");
+                        });*/
                         /**
                          * So ran into an issue. firestore ID's can't have / (forward slashses) in them so the url id is out
                          * because replacing them is 1) extra formatting and overhead on our part. 2) no way to guarentee that our
@@ -139,9 +258,10 @@ function massDataLoad(dbCred){
                             // again will cause search degredation
                             // our own system though and will require a bit more management.
                         
-                        coll.doc(i).set({
-                            url: curURL,
-                        });
+                        //coll.doc(curURL).set({
+                        //    fullURL: curURL,
+                        //}); 
+                       
                     }
                 }
                 newLocationReq.send(null);
@@ -181,9 +301,16 @@ function massDataUpdate(dbCred){
    phishTankReq.send(null);
    //return phishTankReq;
 }
+function adminLogin(dbCred, username, password){
+    var adColl_prom = dbCred.collection("admin").get();;
+    adColl_prom.then(answer => {
+        console.log(answer.docs[0].id);
+        console.log(answer.doc.data())
+    })
+}
 // TODO
 // The framework for the automated update function. This will be very simialr to the Load function above
 // and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
 // ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
 //function massDataUpdate(dbCred){}
-module.exports = {massDataLoad, deleteData, addToDB, searchURL};
+module.exports = {deleteData, addToDB, searchURL, massDataLoad};
