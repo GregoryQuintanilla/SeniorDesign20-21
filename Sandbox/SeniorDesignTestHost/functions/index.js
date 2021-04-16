@@ -61,7 +61,7 @@ app.get('/addToDB', (request,response) => {
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    var positive = databasefuncs.searchURL(firestoreDB,"http://pt-o.top/awb.html");
+    var positive = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
     var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
     console.log("SENDING RESPONSE??");
     positive.then(answer => {

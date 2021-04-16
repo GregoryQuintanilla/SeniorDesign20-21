@@ -41,12 +41,11 @@ browser.runtime.onInstalled.addListener(function() {
                 });
             }
         }); // browser.tabs.query
-
-    });  // browser.tabs.onUpdated
+    });  // browser.tabs.
 
 }); // browser.runtime.onInstalled
 
-/*browser.tabs.onUpdated.addListener( function (tabId, changeInfo, tab)
+browser.tabs.onUpdated.addListener( function (tabId, changeInfo, tab)
 {
     if (changeInfo.status == 'complete'){
         console.log(tabId);
@@ -55,13 +54,25 @@ browser.runtime.onInstalled.addListener(function() {
 
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", "https://localhost:5000/toServer", false); 
-        xmlHttp.onload = function(){
+        xmlHttp.onload = function(response){
             console.log("hello there");
         };
         xmlHttp.send(null);
         console.log(xmlHttp.requestText);
     }
-});*/
+});
+
+var pattern = "https://mdn.mosillademos.org/*";
+
+function cancel() {
+    console.log("Called during Before Request");
+    return 1;
+}
+
+browser.webRequest.onBeforeRequest.addListener( 
+    cancel
+);
+
 // browser.webRequest.onBeforeRequest.addListener(function(details) {
 //     console.log(details);
 //     console.log("Before load");

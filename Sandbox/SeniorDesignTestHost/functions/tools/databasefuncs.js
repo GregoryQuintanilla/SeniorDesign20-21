@@ -68,17 +68,60 @@ function searchURL(dbCred, curURL){
 }
 // http://hostpoint-admin-panel52358.web65.s177.goserver.host/hostpoint/index.html
 // last doc in firebase old version
+function searchPromise(document, host, url)
+{
+    console.log("Looking for url");
+    console.log(document.exists);
+    if(document.exists)
+    {
+        console.log("host exists");
+        var urlArray = document.data().urls;
+        console.log("data ", urlArray);
+        console.log("Looking through data");
+        for(var i = 0; i < urlArray.length; i++)
+        {
+            if(url == urlArray[i])
+            {
+                console.log("Found URL in data");
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return 0;
+}
+
 function searchURL2(dbCred, curURL){
+    console.log("got to searchURL2");
     if(typeof(curURL) != "string"){
         return -1;
     }
-
+    console.log("is a string");
+    var firstSlash = curURL.indexOf('/');
+    var hostStart = firstSlash+2;
+    var endOfHost = curURL.indexOf('/',hostStart);
+    var hostParse = curURL.slice(hostStart,endOfHost);
+                        
     // TODO - param check on dbCred
 
 
     // encountering lots of promises wonky-ness
     // return the id??
-    var URLCollection_promise = dbCred.collection("test1").doc(curURL);
+    console.log("Got to first promise");
+    var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
+    .get()
+    .then(document => {
+        console.log("about to send to searchPromise");
+        searchPromise(document,hostParse,curURL);
+    })
+    .catch(err =>
+    {
+        console.log("There was an error in searchURL");
+        console.log(err);
+    });
+
+    return URLCollection_promise;
+    /*
     var result = URLCollection_promise.then(query => {
         var documents = query.docs;
 
@@ -92,6 +135,7 @@ function searchURL2(dbCred, curURL){
         console.log("There was an error in searchURL");
         console.log(err);
     });
+    */
 
     return result;
     
@@ -130,19 +174,13 @@ function documentAdd(collection,url,host){
     collection.doc(host)
     .get()
     .then(document =>{
-        //console.log(document.id);
-        //console.log(host);
-        //console.log(url);
-        
         if(document.exists){
             //console.log("document data: ", document.data());
             var arr = document.data().urls
-            if(!arr.find(url)){
-                //console.log("urls Array", arr);
-                //console.log("Can I add things to this array?");
+            
+            if(!arr.find(element => element == url)){
                 arr.push(url);
-                //console.log("new array???? ", arr);
-                console.log(arr);
+
                 collection.doc(document.id).set({
                     urls: arr,
                 })
@@ -152,7 +190,6 @@ function documentAdd(collection,url,host){
             }
         }
         else{
-            console.log("Document doesn't Exist")
             collection.doc(document.id).set({
                 urls: [url],
             });
@@ -161,40 +198,6 @@ function documentAdd(collection,url,host){
     .catch(error => {
         console.log(error)
     })
-}
-// a .then() function used in the addition of a document into our database.
-// url = the full url currently being added.
-// parsedURL = the host of the url for nesting within out collection
-// document = the documentsnapshot (if it exists) being checked.
-function documentAdd_then(collection, url, host, document){
-    //console.log("does this doc exist? ", document.exists);
-    console.log(document.id);
-    //console.log(document.data());
-    console.log("did we pass the correct URL? ", url.toString());
-    console.log("Did the hostparse also come along? ", host);
-    
-
-    /*
-    if(document.exists){
-        //console.log("document data: ", document.data());
-        var arr = document.data().urls
-        //console.log("urls Array", arr);
-        //console.log("Can I add things to this array?");
-        arr.push("another thingy please");
-        //console.log("new array???? ", arr);
-        console.log(arr);
-        collection.doc(document.id).set({
-            urls: arr,
-        })
-    }
-    else{
-        console.log("Document doesn't Exist")
-        collection.doc(document.id).set({
-            urls: [url],
-        });
-    }
-    */
-    return 0;
 }
 
 function massDataLoad(dbCred){
@@ -217,8 +220,8 @@ function massDataLoad(dbCred){
                 newLocationReq.onload = function() {
                     var coll = dbCred.collection("MaliciousSites2");
                     var data = JSON.parse(newLocationReq.responseText);
-                    //console.log(data.length);
-                    for (i = 0; i<10; i++){
+
+                    for (i = 0; i<data.length; i++){
                         curURL = data[i].url;
                         
                         //need to parse url to base hostsite.
@@ -226,9 +229,6 @@ function massDataLoad(dbCred){
                         var hostStart = firstSlash+2;
                         var endOfHost = curURL.indexOf('/',hostStart);
                         var hostParse = curURL.slice(hostStart,endOfHost);
-                        // Check if already duplicate?
-                        console.log("url in MDL: ",curURL);
-                        console.log("host in MDL: ", hostParse);
                         documentAdd(coll,curURL,hostParse);
                         /*
                         coll.doc(hostParse).get()
@@ -313,4 +313,4 @@ function adminLogin(dbCred, username, password){
 // and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
 // ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
 //function massDataUpdate(dbCred){}
-module.exports = {deleteData, addToDB, searchURL, massDataLoad};
+module.exports = {deleteData, addToDB, searchURL, searchURL2, massDataLoad};
