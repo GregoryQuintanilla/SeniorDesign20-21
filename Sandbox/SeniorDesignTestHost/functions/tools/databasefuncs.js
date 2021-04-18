@@ -70,19 +70,13 @@ function searchURL(dbCred, curURL){
 // last doc in firebase old version
 function searchPromise(document, host, url)
 {
-    console.log("Looking for url");
-    console.log(document.exists);
     if(document.exists)
     {
-        console.log("host exists");
         var urlArray = document.data().urls;
-        console.log("data ", urlArray);
-        console.log("Looking through data");
         for(var i = 0; i < urlArray.length; i++)
         {
             if(url == urlArray[i])
             {
-                console.log("Found URL in data");
                 return 1;
             }
         }
@@ -92,11 +86,9 @@ function searchPromise(document, host, url)
 }
 
 function searchURL2(dbCred, curURL){
-    console.log("got to searchURL2");
     if(typeof(curURL) != "string"){
         return -1;
     }
-    console.log("is a string");
     var firstSlash = curURL.indexOf('/');
     var hostStart = firstSlash+2;
     var endOfHost = curURL.indexOf('/',hostStart);
@@ -107,40 +99,18 @@ function searchURL2(dbCred, curURL){
 
     // encountering lots of promises wonky-ness
     // return the id??
-    console.log("Got to first promise");
     var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
     .get()
     .then(document => {
-        console.log("about to send to searchPromise");
         searchPromise(document,hostParse,curURL);
     })
     .catch(err =>
     {
-        console.log("There was an error in searchURL");
         console.log(err);
     });
 
     return URLCollection_promise;
-    /*
-    var result = URLCollection_promise.then(query => {
-        var documents = query.docs;
-
-        for(i = 0; i < documents.length; i++){
-            if(documents[i].data().url == curURL){
-                return documents[i].id;
-            }
-        }
-        return -1;
-    }).catch(err =>{
-        console.log("There was an error in searchURL");
-        console.log(err);
-    });
-    */
-
-    return result;
-    
 }
-// function searchByID{}
 
 // the start of the automated data load function. Contacts phishtank and reqests it's data to be loaded into the cloud firestore
 // currently traverses to the .json data and requests it. taking that object it is loaded into the cloud firestore
