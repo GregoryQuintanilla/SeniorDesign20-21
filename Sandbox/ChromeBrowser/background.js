@@ -6,7 +6,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     var fullURL = baseServerURL + tabURL;
     console.log(fullURL);
 
-    if (tabURL != undefined && tabURL != "chrome://newtab/") { // regex for anything match chrome://??
+    if (tabURL != undefined && tabURL != "chrome://newtab/") {
         //alert(changeInfo.url);
 
         var xmlHttp = new XMLHttpRequest();
@@ -26,6 +26,133 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     }
 });
 
+
+/***
+ *variable Declarations 
+ * 
+ *****/
+//Global variable to hold the active tab name **Check whether it should be the whole url or the hostname 
+var activeTabName = "";
+var URLforDB = "";
+
+
+/***
+ *Getting the URL 
+ * 
+ *****/
+
+//This loads once a tab loads 
+chrome.tabs.query({
+    active: true,
+    lastFocusedWindow: true
+}, function(tabs) {
+    // and use that tab to fill in out title and url
+    var tab = tabs[0];
+    console.log(tab.url);
+    //alert(tab.url); - Testing purposes ~ Instead of an alert just set the report tabs value 
+    
+    var nameURL = tab.url //This will return the whole link to pass in
+    var Hostname = extractHostname(tab.url); //This will return just the host name to pass in   ---****Visuals :: Host name  - Send it on the other side-use both. Bad host domains ban itnumerous reports
+    //*****Click and highlight it -show all the url to the user 
+
+
+    //Set the global variable 
+    activeTabName = Hostname;
+    URLforDB = nameURL;
+
+    document.getElementById('website-display').value = nameURL;
+   
+    document.getElementById('website-display').addEventListener("mouseover", mouseOver);
+    document.getElementById('website-display').addEventListener("mouseout", mouseOut);
+
+});
+
+
+
+
+
+/***
+ * Database Methods 
+ * 
+ *****/
+//This is called once the report button is pressed after everything has been loaded
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("button-display").addEventListener("click", ReportWebsite);
+    
+  });
+
+function ReportWebsite() //Reports site to the database
+{
+    var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/reportLink?link=";
+    var reportURL = URLforDB;
+
+    var fullURL = baseServerURL + reportURL;
+    console.log(fullURL);
+
+    if (tabURL != undefined && tabURL != "chrome://newtab/") {
+        //alert(changeInfo.url);
+
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", fullURL, true);
+        xmlHttp.onload = function(){
+            if (this.responseText == "Added to DB???"){ // proper string?
+                confirm("Thank you for your contribution! We will review you submission.");
+            } else{
+                //?
+            }
+
+        };
+        xmlHttp.send();
+   
+        //confirm(fullURL);
+    }
+    //alert(URLforDB);
+    //console.log(URLforDB)
+}
+
+/***
+ * Helper Methods 
+ * 
+ *****/
+
+function mouseOver() {
+    document.getElementById('website-display').style.color = "red";
+  }
+  
+  function mouseOut() {
+    document.getElementById('website-display').style.color = "black";
+  }
+
+//Returns a boolean determining whether or not the report button was null
+function ReportBtnIsNotNull()
+{
+    var btn = document.getElementById('button-display');
+if(btn){
+return true;
+}
+return false;
+}
+
+//Extracts the host name from the given url
+function extractHostname(url) {
+    var hostname;
+    //find & remove protocol (http, ftp, etc.) and get hostname
+
+    if (url.indexOf("//") > -1) {
+        hostname = url.split('/')[2];
+    }
+    else {
+        hostname = url.split('/')[0];
+    }
+
+    //find & remove port number
+    hostname = hostname.split(':')[0];
+    //find & remove "?"
+    hostname = hostname.split('?')[0];
+
+    return hostname;
+}
 
 
 

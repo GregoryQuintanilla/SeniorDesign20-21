@@ -9,7 +9,7 @@
         "https://*/",
         "https://localhost:5000/toServer" 
     ],
-    "background": {
+    "scripts": {
         "js": ["background.js"]
     },
 	"options_ui": {
