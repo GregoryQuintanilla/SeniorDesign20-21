@@ -91,15 +91,12 @@ app.get('/getData', (request,response) => {
 
 app.get('/reportLink', (request, response) => {
     // Generate URL object
-    const givenURL = new URL(request.query.link);
+    var url = request.query.link;
 
     // Add document for URL
-    testDocRef.doc('urlTest').set({
-        url: `${givenURL}`,
-        online: 'true'
-    });
+    databasefuncs.stageURL(firestoreDB, url);
     // If valid
-    response.send(`Added ${givenURL} to database.`);
+    response.send(`Added ${url} to database.`);
 });
 
 app.get('/timestamp', (request, response) => {

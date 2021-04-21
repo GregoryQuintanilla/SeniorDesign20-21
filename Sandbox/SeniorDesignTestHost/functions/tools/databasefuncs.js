@@ -278,9 +278,18 @@ function adminLogin(dbCred, username, password){
         console.log(answer.doc.data())
     })
 }
+
+function stageURL(dbCred, curURL){
+    var coll = dbCred.collection("StagedSites");
+    var firstSlash = curURL.indexOf('/');
+    var hostStart = firstSlash+2;
+    var endOfHost = curURL.indexOf('/',hostStart);
+    var hostParse = curURL.slice(hostStart,endOfHost);
+    documentAdd(coll,curURL,hostParse);
+}
 // TODO
 // The framework for the automated update function. This will be very simialr to the Load function above
 // and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
 // ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
 //function massDataUpdate(dbCred){}
-module.exports = {deleteData, addToDB, searchURL, searchURL2, massDataLoad};
+module.exports = {deleteData, addToDB, searchURL, searchURL2, massDataLoad, stageURL};
