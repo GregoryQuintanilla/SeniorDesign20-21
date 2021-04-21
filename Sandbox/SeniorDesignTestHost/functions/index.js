@@ -186,19 +186,26 @@ app.get('/processSite', (request, response) => {
                         var containsSSL = processing.urlContainsSSL(url);
                         var containsIP = processing.urlContainsIP(url);
                         var containsAt = processing.urlContainsAt(url);
+                        var containsKeys = processing.urlContainsKeyPhrase(url);
+                        var containsPort = processing.urlContainsPort(url);
+                        var containsShortener = processing.urlContainsShortener(url);
                         var numInput = processing.inputFields(result);
                         var numKeyPhrases = processing.keyPhrases(result);
                         var score = 0;
 
-                        if (numInput==0){ score-=20 } else score += numInput*2; // if no input fields, likely not malicious
-                        if (numKeyPhrases==0){ score-=20 } else score += numKeyPhrases*2;
-                        if (containsIP) score+=10;
-                        if (containsSSL){ score-=2 } else score += 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
-                        if (containsAt) score+=25;
+                        if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
+                        if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
+                        if (containsIP) score-=10;
+                        if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
+                        if (containsAt) score-=25;
+                        if (containsKeys) score-=5;
+                        if (containsPort) score-=5;
+                        if (containsShortener) score-=5;
+
 
                         // var src = "Website: " + url + " has " + count + " input fields." + " <br><br>" + result.replace(/[<]/g, "<'"); 
                         var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
-                        containsAt? ${containsAt}.`; 
+                        containsAt? ${containsAt}, containsKeys?: ${containsKeys}, containsPort?: ${containsPort}.`; 
 
                         var serverResponse = `This website has scored ${score} points. ${debug}`;
                         response.send(serverResponse);
