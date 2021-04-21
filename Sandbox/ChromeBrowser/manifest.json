@@ -6,6 +6,9 @@
         "activeTab",
         "declarativeContent", 
         "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "tabs",
         "https://www.google.com/",
         "https://*/",
         "https://localhost:5000/toServer" 
@@ -13,7 +16,7 @@
     "options_page": "options.html",
     "background": {
         "scripts": ["background.js"],
-        "persistent": false
+        "persistent": true
     },
     "browser_action": {
         "default_popup": "Home.html",

@@ -11,6 +11,9 @@
         "https://*/",
         "https://localhost:5000/toServer" 
     ],
+    "background": {
+        "js": ["background.js"]
+    },
 	"options_ui": {
 		"page": "options.html"
 	},
