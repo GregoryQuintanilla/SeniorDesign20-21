@@ -138,7 +138,7 @@ function getSourceCode(url){
         return html;
 
     }).catch(function (err) { // There was an error
-        console.warn('Something went wrong in getSourceCode().', err);
+        return err;
     });
     
     return result; // return entire source code
@@ -165,7 +165,7 @@ function urlContainsIP(siteLink){
 
 function urlContainsSSL(siteLink){ // checks whether the site contains an SSL certificate
     const splitStr = siteLink.split('/');   //Split the url
-    
+    console.log(splitStr);
     return splitStr[0].includes("https");
 }
 
@@ -173,7 +173,7 @@ function keyPhrases(sourceCode){
     // Checks for alarming key words often used in phishing sites
     var count = 0;
 
-    sourceCode = "dlsdksld claim now, for free Urgent lol";
+    //sourceCode = "dlsdksld claim now, for free Urgent lol";
 
     count += (sourceCode.match(/[U|u]rgent/g) || []).length;
     count += (sourceCode.match(/!!/g) || []).length;
@@ -196,7 +196,11 @@ function urlPeriodAmt(siteLink){ // checks whether the site url contains periods
  };
 
 function urlContainsAt(siteLink){ // checks whether the site contains an "@"
-    return siteLink.includes("@");
+    const splitStr = siteLink.split('/');
+
+    if (splitStr[2].includes("@")) return true;
+
+    return false;
 }
 
 function urlDashesAmt(siteLink){ // checks whether the site url contains periods
@@ -205,4 +209,38 @@ function urlDashesAmt(siteLink){ // checks whether the site url contains periods
     return count;
  };
 
-module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases, checkDomainAge};
+function urlContainsKeyPhrase(siteLink){
+    if (siteLink.includes("secure")) return true;
+    if (siteLink.includes("account")) return true;
+    if (siteLink.includes("webscr")) return true;
+    if (siteLink.includes("login")) return true;
+    if (siteLink.includes("signin")) return true;
+    if (siteLink.includes("banking")) return true;
+    if (siteLink.includes("confirm")) return true;
+
+    return false;
+}
+
+function urlContainsPort(siteLink){
+    const splitStr = siteLink.split('/');
+    const regex = /^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$/g;
+
+    if (splitStr[2].includes(":")){
+        if (splitStr[2].includes(":21")) return false;
+        if (splitStr[2].includes(":70")) return false;
+        if (splitStr[2].includes(":80")) return false;
+        if (splitStr[2].includes(":443")) return false;
+        if (splitStr[2].includes(":1080")) return false;
+        if (splitStr[2].match(regex)) return true;
+    }
+
+    return false;
+}
+
+function urlContainsShortener(siteLink){
+    if (siteLink.includes("tinyurl")) return true;
+    if (siteLink.includes("bit.ly")) return true;
+    return false;
+}
+
+module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases, checkDomainAge, urlContainsKeyPhrase, urlContainsPort, urlContainsShortener};
