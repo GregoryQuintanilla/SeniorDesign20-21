@@ -181,7 +181,7 @@ app.get('/processSite', (request, response) => {
             // Begin Stage 1: search in DB
             response.set('Access-Control-Allow-Origin','*');
 
-            var DBSearchResponse = databasefuncs.searchURL(firestoreDB, url);
+            var DBSearchResponse = databasefuncs.searchURL2(firestoreDB, url);
 
             DBSearchResponse.then(answer => {
                 if (answer == 0){ // URL is not a not string
