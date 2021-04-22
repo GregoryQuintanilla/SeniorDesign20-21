@@ -80,36 +80,53 @@ function searchPromise(document, host, url)
                 return 1;
             }
         }
-        return 0;
+        return -1;
     }
-    return 0;
+    return -2;
 }
 
 function searchURL2(dbCred, curURL){
     if(typeof(curURL) != "string"){
-        return -1;
+        return -2;
     }
     var firstSlash = curURL.indexOf('/');
     var hostStart = firstSlash+2;
     var endOfHost = curURL.indexOf('/',hostStart);
     var hostParse = curURL.slice(hostStart,endOfHost);
+    var responseVal;
                         
     // TODO - param check on dbCred
 
 
     // encountering lots of promises wonky-ness
     // return the id??
-    var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
+    /*var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
     .get()
     .then(document => {
         searchPromise(document,hostParse,curURL);
+    */
+    var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse).get()
+    var responseVal = URLCollection_promise.then(document => {
+        if(document.exists)
+        {
+            var urlArray = document.data().urls;
+            for(var i = 0; i < urlArray.length; i++)
+            {
+                if(curURL == urlArray[i])
+                {
+                    return 1;
+                }
+            }
+            return -1;
+        }
+        return -1;
     })
     .catch(err =>
     {
         console.log(err);
     });
 
-    return URLCollection_promise;
+    return responseVal;
 }
 
 // the start of the automated data load function. Contacts phishtank and reqests it's data to be loaded into the cloud firestore
