@@ -181,9 +181,49 @@ function massDataUpdate(dbCred){
    phishTankReq.send(null);
    //return phishTankReq;
 }
+
+function documentAdd(collection,url,host){
+    collection.doc(host)
+    .get()
+    .then(document =>{
+        if(document.exists){
+            //console.log("document data: ", document.data());
+            var arr = document.data().urls
+            
+            if(!arr.find(element => element == url)){
+                arr.push(url);
+
+                collection.doc(document.id).set({
+                    urls: arr,
+                })
+            }
+            else{
+                console.log("this url already exists in the given host");
+            }
+        }
+        else{
+            collection.doc(document.id).set({
+                urls: [url],
+            });
+        }
+    })
+    .catch(error => {
+        console.log(error)
+    })
+}
+
+function stageURL(dbCred, curURL){
+    var coll = dbCred.collection("StagedSites");
+    var firstSlash = curURL.indexOf('/');
+    var hostStart = firstSlash+2;
+    var endOfHost = curURL.indexOf('/',hostStart);
+    var hostParse = curURL.slice(hostStart,endOfHost);
+    documentAdd(coll,curURL,hostParse);
+}
+
 // TODO
 // The framework for the automated update function. This will be very simialr to the Load function above
 // and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
 // ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
 //function massDataUpdate(dbCred){}
-module.exports = {massDataLoad, deleteData, addToDB, searchURL};
+module.exports = {massDataLoad, deleteData, addToDB, searchURL, stageURL};

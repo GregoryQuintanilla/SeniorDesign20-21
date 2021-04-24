@@ -1,7 +1,8 @@
+// checks when the user navigates to a new url and displays alters if found in DB, not yet for precessing
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
-    var test = "timestamp";
+    // var test = "timestamp";
 
     var fullURL = baseServerURL + tabURL;
     console.log(fullURL);
@@ -12,13 +13,12 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", fullURL, true);
         xmlHttp.onload = function(){
-        if (this.responseText == "Site found in our phishing DB."){
-            console.log(this.responseText);
-            confirm("!! WARNING !! This site is potentially phishing. Would you like to continue browsing the page? " + this.responseText);
-        } else { // receive score from server and check or do nothing if its safe since dont want to bother user
-            console.log(this.responseText);
-        }
-
+            if (this.responseText == "Site found in our phishing DB."){
+                console.log(this.responseText);
+                confirm("!! WARNING !! This site is potentially phishing. Would you like to continue browsing the page? " + this.responseText);
+            } else { // receive score from server and check or do nothing if its safe since dont want to bother user
+                console.log(this.responseText);
+            }
         };
         xmlHttp.send();
    
@@ -82,31 +82,54 @@ document.addEventListener('DOMContentLoaded', function() {
     
   });
 
-function ReportWebsite() //Reports site to the database
+function ReportWebsite() //Reports site to the database when the button is pressed
 {
-    var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/reportLink?link=";
+    var baseServerURL = "http://localhost:5001/senior-design-test-host/us-central1/app/reportLink?link=";
     var reportURL = URLforDB;
+    //var matchStr = "Added " + reportURL + " to database.";
 
     var fullURL = baseServerURL + reportURL;
-    console.log(fullURL);
+    
+    var bkg = chrome.extension.getBackgroundPage();
+    // bkg.console.log(fullURL);
 
-    if (tabURL != undefined && tabURL != "chrome://newtab/") {
-        //alert(changeInfo.url);
+    var xmlHttp2 = new XMLHttpRequest();
+    xmlHttp2.open("GET", fullURL, true);
+    
+    xmlHttp2.onreadystatechange = function(){
+        //alert(fullURL);
+        if (xmlHttp2.readyState == XMLHttpRequest.DONE) {
+            alert("Thank you for your contribution! We will review your submission.");
+        }
+        //bkg.console.log("hiii " + this.responseText);
+        // bkg.console.log(fullURL);
+        //alert(this.responseText);
+        //if (this.responseText == matchStr){
+            //confirm("Thank you for your contribution! We will review your submission.");
+        //} else{
+            //?
+        //}
+    };
+    xmlHttp2.send();
 
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", fullURL, true);
-        xmlHttp.onload = function(){
-            if (this.responseText == "Added to DB???"){ // proper string?
-                confirm("Thank you for your contribution! We will review you submission.");
-            } else{
-                //?
-            }
+    //alert(fullURL);
 
-        };
-        xmlHttp.send();
-   
+    //if (reportURL != undefined && reportURL != "chrome://newtab/") {
+         //alert(changeInfo.url);
+
+        // var xmlHttp = new XMLHttpRequest();
+        // xmlHttp.open("GET", fullURL, true);
+        // xmlHttp.onload = function(){
+        //     alert(this.responseText);
+        //     //if (this.responseText == matchStr){
+        //         //confirm("Thank you for your contribution! We will review your submission.");
+        //     //} else{
+        //         //?
+        //     //}
+        // };
+        // xmlHttp.send();
         //confirm(fullURL);
-    }
+    //}
     //alert(URLforDB);
     //console.log(URLforDB)
 }
@@ -155,8 +178,6 @@ function extractHostname(url) {
 }
 
 
-
-
 /*chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({color: '#3aa757'}, function() {
         console.log("The color is green.");
@@ -203,11 +224,6 @@ function extractHostname(url) {
     });  // chrome.tabs.onUpdated
 
 }); // chrome.runtime.onInstalled*/
-
-
-
-
-
 
 
 // chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
