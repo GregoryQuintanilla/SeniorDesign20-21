@@ -194,11 +194,11 @@ app.get('/processSite', (request, response) => {
 
                             if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
                             if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
-                            if (containsIP) score-=10;
+                            if (containsIP) score-=15;
                             if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
                             if (containsAt) score-=25;
                             if (containsKeys) score-=5;
-                            if (containsPort) score-=5;
+                            if (containsPort) score-=10;
                             if (containsShortener) score-=5;
  
                             var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
