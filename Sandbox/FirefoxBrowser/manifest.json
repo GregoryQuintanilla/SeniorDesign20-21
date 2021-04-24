@@ -11,9 +11,12 @@
         "https://*/",
         "https://localhost:5000/toServer" 
     ],
-    "scripts": {
-        "js": ["background.js"]
-    },
+    "content_scripts": [
+        {
+            "matches":["<all_urls>"],
+            "js": ["background.js"]
+        }
+    ],
 	"options_ui": {
 		"page": "options.html"
 	},
