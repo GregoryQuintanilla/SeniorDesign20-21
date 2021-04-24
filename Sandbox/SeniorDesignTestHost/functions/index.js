@@ -61,11 +61,23 @@ app.get('/addToDB', (request,response) => {
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    var positive = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
-    var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
-    console.log("SENDING RESPONSE??");
-    positive.then(answer => {
-        response.send(answer);
+    //var search = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
+    var search = databasefuncs.searchURL2(firestoreDB,"http://www.google.com");
+    console.log("back in the routing");
+    console.log(search);
+    search.then(answer => {
+        console.log("answer is ", answer);
+        if(answer == 1)
+        {
+            response.json({status:100,found:1});
+        }
+        else{
+            response.json({status:100,found:0});
+        }
+    })
+    .catch(err =>
+    {
+        response.sendStatus(500);
     });
     //response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
 })
@@ -168,8 +180,8 @@ app.get('/processSite', (request, response) => {
             // Begin Stage 1: search in DB
             response.set('Access-Control-Allow-Origin','*');
 
-            // new search function
             var DBSearchResponse = databasefuncs.searchURL2(firestoreDB, url);
+
             DBSearchResponse.then(answer => {
                 if (answer == -2){ // URL is not a not string
                     response.send("URL is not a string");

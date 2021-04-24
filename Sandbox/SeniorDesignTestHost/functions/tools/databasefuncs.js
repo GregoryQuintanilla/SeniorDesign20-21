@@ -1,6 +1,7 @@
 // since this is being used by node we need to requrie this API tool specifially because it doesn't come with Node by default.
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-
+//var performance = require('performance').performance;
+const { PerformanceObserver, performance } = require('perf_hooks');
 /** Deletes a data entry by url
  * dbCred - admin.firestore() object - the object to the firestore you wan tot access
  * URL - string - is the desired URL to be found and removed. 
@@ -44,8 +45,6 @@ function searchURL(dbCred, curURL){
     }
 
     // TODO - param check on dbCred
-
-
     // encountering lots of promises wonky-ness
     // return the id??
     var URLCollection_promise = dbCred.collection("MaliciousSites").get();
@@ -70,13 +69,18 @@ function searchURL(dbCred, curURL){
 // last doc in firebase old version
 function searchPromise(document, host, url)
 {
+    console.log("got to search");
+    console.log(host);
+    console.log(url);
     if(document.exists)
     {
+        console.log("Do exist");
         var urlArray = document.data().urls;
         for(var i = 0; i < urlArray.length; i++)
         {
             if(url == urlArray[i])
             {
+                console.log("do exist is url list too");
                 return 1;
             }
         }
@@ -96,8 +100,6 @@ function searchURL2(dbCred, curURL){
     var responseVal;
                         
     // TODO - param check on dbCred
-
-
     // encountering lots of promises wonky-ness
     // return the id??
     /*var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
@@ -124,9 +126,8 @@ function searchURL2(dbCred, curURL){
     .catch(err =>
     {
         console.log(err);
+        return -1
     });
-    //random comment
-
     return responseVal;
 }
 
