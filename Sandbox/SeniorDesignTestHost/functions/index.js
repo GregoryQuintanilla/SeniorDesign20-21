@@ -35,6 +35,7 @@ app.get('/addToRealTimeDB',(request,response) =>{
     });*/
     response.send(admin.auth().app);
 });
+
 app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
 
@@ -47,6 +48,7 @@ app.get('/massDataLoad', (request,response) => {
 
     response.send("hopefully data is mass loaded. idk.")
 });
+
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
     databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
@@ -59,11 +61,23 @@ app.get('/addToDB', (request,response) => {
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    var positive = databasefuncs.searchURL(firestoreDB,"http://pt-o.top/awb.html");
-    var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
-    console.log("SENDING RESPONSE??");
-    positive.then(answer => {
-        response.send(answer);
+    //var search = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
+    var search = databasefuncs.searchURL2(firestoreDB,"http://www.google.com");
+    console.log("back in the routing");
+    console.log(search);
+    search.then(answer => {
+        console.log("answer is ", answer);
+        if(answer == 1)
+        {
+            response.json({status:100,found:1});
+        }
+        else{
+            response.json({status:100,found:0});
+        }
+    })
+    .catch(err =>
+    {
+        response.sendStatus(500);
     });
     //response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
 })
@@ -167,7 +181,7 @@ app.get('/processSite', (request, response) => {
             // Begin Stage 1: search in DB
             response.set('Access-Control-Allow-Origin','*');
 
-            var DBSearchResponse = databasefuncs.searchURL(firestoreDB, url);
+            var DBSearchResponse = databasefuncs.searchURL2(firestoreDB, url);
 
             DBSearchResponse.then(answer => {
                 if (answer == 0){ // URL is not a not string
@@ -183,19 +197,26 @@ app.get('/processSite', (request, response) => {
                         var containsSSL = processing.urlContainsSSL(url);
                         var containsIP = processing.urlContainsIP(url);
                         var containsAt = processing.urlContainsAt(url);
+                        var containsKeys = processing.urlContainsKeyPhrase(url);
+                        var containsPort = processing.urlContainsPort(url);
+                        var containsShortener = processing.urlContainsShortener(url);
                         var numInput = processing.inputFields(result);
                         var numKeyPhrases = processing.keyPhrases(result);
                         var score = 0;
 
-                        if (numInput==0){ score-=20 } else score += numInput*2; // if no input fields, likely not malicious
-                        if (numKeyPhrases==0){ score-=20 } else score += numKeyPhrases*2;
-                        if (containsIP) score+=10;
-                        if (containsSSL){ score-=2 } else score += 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
-                        if (containsAt) score+=25;
+                        if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
+                        if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
+                        if (containsIP) score-=10;
+                        if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
+                        if (containsAt) score-=25;
+                        if (containsKeys) score-=5;
+                        if (containsPort) score-=5;
+                        if (containsShortener) score-=5;
+
 
                         // var src = "Website: " + url + " has " + count + " input fields." + " <br><br>" + result.replace(/[<]/g, "<'"); 
                         var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
-                        containsAt? ${containsAt}.`; 
+                        containsAt? ${containsAt}, containsKeys?: ${containsKeys}, containsPort?: ${containsPort}.`; 
 
                         var serverResponse = `This website has scored ${score} points. ${debug}`;
                         response.send(serverResponse);

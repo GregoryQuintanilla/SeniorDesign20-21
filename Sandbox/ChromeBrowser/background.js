@@ -68,9 +68,6 @@ chrome.tabs.query({
 });
 
 
-
-
-
 /***
  * Database Methods 
  * 
@@ -177,6 +174,21 @@ function extractHostname(url) {
     return hostname;
 }
 
+/*
+var xmlHttp = new XMLHttpRequest();
+xmlHttp.open("GET", "https://us-central1-senior-design-test-host.cloudfunctions.net/app/timestamp", true);
+xmlHttp.onload = function(){
+    console.log(this.responseText);
+    confirm("Would you like to continue browsing the page?");
+};
+xmlHttp.send();
+
+const filter = {
+    urls: [
+        //'*://www.google.com/*',
+        '*://www.hofstra.edu/*',
+    ],
+}; */
 
 /*chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({color: '#3aa757'}, function() {
@@ -280,6 +292,14 @@ function extractHostname(url) {
 // const webRequestFlags = [
 //     'blocking',
 // ];
+
+/* chrome.webRequest.onBeforeRequest.addListener(()=> {
+    console.log('Blocking malicious page.');
+    //alert('Phishers has identified this page to be malicious.');
+    return {
+        cancel: true,
+    };
+}, filter, webRequestFlags); */
 
 // chrome.webRequest.onBeforeRequest.addListener(()=> {
 //     console.log('Blocking malicious page.');

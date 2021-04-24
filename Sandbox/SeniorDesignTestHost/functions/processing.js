@@ -209,4 +209,38 @@ function urlDashesAmt(siteLink){ // checks whether the site url contains periods
     return count;
  };
 
-module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases, checkDomainAge};
+function urlContainsKeyPhrase(siteLink){
+    if (siteLink.includes("secure")) return true;
+    if (siteLink.includes("account")) return true;
+    if (siteLink.includes("webscr")) return true;
+    if (siteLink.includes("login")) return true;
+    if (siteLink.includes("signin")) return true;
+    if (siteLink.includes("banking")) return true;
+    if (siteLink.includes("confirm")) return true;
+
+    return false;
+}
+
+function urlContainsPort(siteLink){
+    const splitStr = siteLink.split('/');
+    const regex = /^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$/g;
+
+    if (splitStr[2].includes(":")){
+        if (splitStr[2].includes(":21")) return false;
+        if (splitStr[2].includes(":70")) return false;
+        if (splitStr[2].includes(":80")) return false;
+        if (splitStr[2].includes(":443")) return false;
+        if (splitStr[2].includes(":1080")) return false;
+        if (splitStr[2].match(regex)) return true;
+    }
+
+    return false;
+}
+
+function urlContainsShortener(siteLink){
+    if (siteLink.includes("tinyurl")) return true;
+    if (siteLink.includes("bit.ly")) return true;
+    return false;
+}
+
+module.exports = {test,test2, massDataLoad, getSourceCode, inputFields, urlContainsIP, urlContainsAt, urlContainsSSL, urlPeriodAmt, urlDashesAmt, keyPhrases, checkDomainAge, urlContainsKeyPhrase, urlContainsPort, urlContainsShortener};
