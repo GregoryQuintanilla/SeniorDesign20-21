@@ -129,8 +129,14 @@ function checkDomainAge(domain){
 function getSourceCode(url){
     // Retrieves the source code of a site from its URL
     const fetch = require('node-fetch');
+    const AbortController = require('abort-controller');
+    const controller = new AbortController();
+    const timeout = setTimeout(
+        () => { controller.abort(); },
+        500,
+    );
 
-    var result = fetch(url).then(function (response) { // The API call was successful!
+    var result = fetch(url, { signal: controller.signal }).then(function (response) { // The API call was successful!
         mode: 'no-cors'
         return response.text();
 
@@ -139,6 +145,8 @@ function getSourceCode(url){
 
     }).catch(function (err) { // There was an error
         return err;
+    }).finally(() => {
+        clearTimeout(timeout);
     });
     
     return result; // return entire source code

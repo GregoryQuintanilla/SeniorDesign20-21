@@ -171,7 +171,6 @@ app.get('/numInputFields', (request, response) => {
 app.get('/processSite', (request, response) => {
     // processes the given URL to determine if malicious
     var url = request.query.link;
-    var foundInDb = false;
 
         if(request.query.link == undefined || request.query.link == "") {
             //no link, do nothing
@@ -184,11 +183,9 @@ app.get('/processSite', (request, response) => {
             var DBSearchResponse = databasefuncs.searchURL2(firestoreDB, url);
 
             DBSearchResponse.then(answer => {
-                if (answer == 0){ // URL is not a not string
+                if (answer == -2){ // URL is not a not string
                     response.send("URL is not a string");
-
                 } else if(answer == -1){  // not found in DB
-                    foundInDb = false;
 
                     // Stage 2: If URL not found, begin processing methods here
                     var code = processing.getSourceCode(url);
@@ -200,34 +197,44 @@ app.get('/processSite', (request, response) => {
                         var containsKeys = processing.urlContainsKeyPhrase(url);
                         var containsPort = processing.urlContainsPort(url);
                         var containsShortener = processing.urlContainsShortener(url);
-                        var numInput = processing.inputFields(result);
-                        var numKeyPhrases = processing.keyPhrases(result);
-                        var score = 0;
+                        if (result.toString().includes("FetchError")) {
+                            response.send("Site down");
+                        } else {
+                            var numInput = processing.inputFields(result);
+                            var numKeyPhrases = processing.keyPhrases(result);
+                            var score = 0;
 
-                        if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
-                        if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
-                        if (containsIP) score-=10;
-                        if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
-                        if (containsAt) score-=25;
-                        if (containsKeys) score-=5;
-                        if (containsPort) score-=5;
-                        if (containsShortener) score-=5;
+                            if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
+                            if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
+                            if (containsIP) score-=15;
+                            if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
+                            if (containsAt) score-=25;
+                            if (containsKeys) score-=5;
+                            if (containsPort) score-=10;
+                            if (containsShortener) score-=5;
+ 
+                            var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
+                            containsAt? ${containsAt}, containsKeys?: ${containsKeys}, containsPort?: ${containsPort}.`; 
 
+                            var serverResponse = `This website has scored ${score} points. ${debug}`;
 
-                        // var src = "Website: " + url + " has " + count + " input fields." + " <br><br>" + result.replace(/[<]/g, "<'"); 
-                        var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
-                        containsAt? ${containsAt}, containsKeys?: ${containsKeys}, containsPort?: ${containsPort}.`; 
-
-                        var serverResponse = `This website has scored ${score} points. ${debug}`;
-                        response.send(serverResponse);
+                            if (score<=-25) {
+                                //response.send("Not safe - determined") ;
+                                response.send(serverResponse); // DEBUG LINE
+                            } else {
+                                //response.send("Safe");
+                                response.send(serverResponse); // DEBUG LINE 
+                            }
+                        }
                     }).catch(err => {
-                    //console.warn('Something went wrong in /getSourceCode route.', err);
-                    response.send(`Something went wrong in /getSourceCode route. Reason: ${err}.`);
+
+                    response.send(`Something went wrong in /processSite route. Reason: ${err}.`);
                 });
 
-                } else { // found url in DB at some position
-                    foundInDb = true;
-                    response.send("Site found in our phishing DB."); // If found, cut processing here.
+                } else if (answer == 1) { // found url in DB at some position
+                    response.send("Not safe - in database"); // If found, cut processing here.
+                } else {
+                    response.send("err");
                 }
             }).catch(err => {
                 console.warn("An error occured in processSite route while searching the DB", err);
