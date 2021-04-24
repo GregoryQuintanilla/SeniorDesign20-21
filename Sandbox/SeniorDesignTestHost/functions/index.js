@@ -51,7 +51,8 @@ app.get('/massDataLoad', (request,response) => {
 
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    //databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    databasefuncs.deleteData(firestoreDB, "https://www.centraleconsulta.net/index2.php");
     response.send("Deleted code specified entries");
 })
 app.get('/addToDB', (request,response) => {
@@ -61,8 +62,8 @@ app.get('/addToDB', (request,response) => {
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    //var search = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
-    var search = databasefuncs.searchURL2(firestoreDB,"http://www.google.com");
+    //var search = databasefuncs.searchURL(firestoreDB,"http://000032818.com/banks/Tangerine");
+    var search = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
     console.log("back in the routing");
     console.log(search);
     search.then(answer => {
