@@ -2,27 +2,31 @@
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
-    // var test = "timestamp";
 
     var fullURL = baseServerURL + tabURL;
-    console.log(fullURL);
 
     if (tabURL != undefined && tabURL != "chrome://newtab/") {
-        //alert(changeInfo.url);
 
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", fullURL, true);
         xmlHttp.onload = function(){
-            if (this.responseText == "Site found in our phishing DB."){
+            if (this.responseText == "Not safe - in database"){
+                confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
+                console.log(fullURL);
                 console.log(this.responseText);
-                confirm("!! WARNING !! This site is potentially phishing. Would you like to continue browsing the page? " + this.responseText);
-            } else { // receive score from server and check or do nothing if its safe since dont want to bother user
+            } else if (this.responseText == "Not safe - determined") { 
+                confirm("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ");
+                console.log(fullURL);
                 console.log(this.responseText);
+            } else if (this.responseText == "Safe") {
+                console.log(fullURL);
+                console.log(this.responseText);
+            } else {
+                console.log(fullURL);
+                console.log("Response from server: " + this.responseText);
             }
         };
         xmlHttp.send();
-   
-        //confirm(fullURL);
     }
 });
 
@@ -81,22 +85,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function ReportWebsite() //Reports site to the database when the button is pressed
 {
-    var baseServerURL = "http://localhost:5001/senior-design-test-host/us-central1/app/reportLink?link=";
+    var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/reportLink?link=";
     var reportURL = URLforDB;
-    //var matchStr = "Added " + reportURL + " to database.";
+    var matchStr = "Added " + reportURL + " to database.";
 
     var fullURL = baseServerURL + reportURL;
-    
     var bkg = chrome.extension.getBackgroundPage();
-    // bkg.console.log(fullURL);
 
     var xmlHttp2 = new XMLHttpRequest();
+
     xmlHttp2.open("GET", fullURL, true);
+    xmlHttp2.onload = function(){
+        if (this.responseText == matchStr){
+            confirm("Thank you for your contribution! We will review your submission. ");
+            bkg.console.log(fullURL);
+            bkg.console.log(this.responseText);
+        } else { 
+            confirm("Something went wrong with processing your request. We apologize for the inconvenience.");
+            bkg.console.log(fullURL);
+            bkg.console.log("Response from server: " + this.responseText);
+        }
+    };
+    xmlHttp2.send();
+}
     
+    /* Aternative connections to backend -----------------------------------------------
     xmlHttp2.onreadystatechange = function(){
         //alert(fullURL);
         if (xmlHttp2.readyState == XMLHttpRequest.DONE) {
-            alert("Thank you for your contribution! We will review your submission.");
+            alert("Deployed - Thank you for your contribution! We will review your submission.");
         }
         //bkg.console.log("hiii " + this.responseText);
         // bkg.console.log(fullURL);
@@ -129,7 +146,7 @@ function ReportWebsite() //Reports site to the database when the button is press
     //}
     //alert(URLforDB);
     //console.log(URLforDB)
-}
+    ------------------------------------------------------------- */
 
 /***
  * Helper Methods 
