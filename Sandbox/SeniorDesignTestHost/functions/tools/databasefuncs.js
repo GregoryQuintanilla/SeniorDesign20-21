@@ -93,7 +93,7 @@ function addToDB(dbCred, malURL){
     var coll = dbCred.collection("test1");
     var host = parseURL(malURL);
     documentAdd(coll,malURL,host);
-    return 1
+    return 1;
 }
 
 function documentAdd(collection,url,host){
