@@ -64,11 +64,12 @@ chrome.tabs.query({
     activeTabName = Hostname;
     URLforDB = nameURL;
 
-    document.getElementById('website-display').value = nameURL;
-   
-    document.getElementById('website-display').addEventListener("mouseover", mouseOver);
-    document.getElementById('website-display').addEventListener("mouseout", mouseOut);
-
+    if(!isNull('website-display')){
+        document.getElementById('website-display').value = nameURL;
+        document.getElementById('website-display').title = nameURL        
+        document.getElementById('website-display').addEventListener("mouseover", mouseOver);
+        document.getElementById('website-display').addEventListener("mouseout", mouseOut);
+        }
 });
 
 
@@ -79,8 +80,9 @@ chrome.tabs.query({
 //This is called once the report button is pressed after everything has been loaded
 
 document.addEventListener('DOMContentLoaded', function() {
+    if(!isNull('button-display')){
     document.getElementById("button-display").addEventListener("click", ReportWebsite);
-    
+    }
   });
 
 function ReportWebsite() //Reports site to the database when the button is pressed
@@ -107,6 +109,16 @@ function ReportWebsite() //Reports site to the database when the button is press
         }
     };
     xmlHttp2.send();
+}
+
+//Determines whether or not an object is null 
+function isNull(ObjectName)
+{
+    if(document.getElementById(ObjectName) == null)
+    {
+        return true;
+    }
+    return false
 }
     
     /* Aternative connections to backend -----------------------------------------------

@@ -56,19 +56,20 @@ chrome.tabs.query({
     //alert(tab.url); - Testing purposes ~ Instead of an alert just set the report tabs value 
     
     var nameURL = tab.url //This will return the whole link to pass in
-    var Hostname = extractHostname(tab.url); //This will return just the host name to pass in   ---****Visuals :: Host name  - Send it on the other side-use both. Bad host domains ban itnumerous reports
+    //var Hostname = extractHostname(tab.url); //This will return just the host name to pass in   ---****Visuals :: Host name  - Send it on the other side-use both. Bad host domains ban itnumerous reports
     //*****Click and highlight it -show all the url to the user 
 
 
     //Set the global variable 
-    activeTabName = Hostname;
+    //activeTabName = Hostname;
     URLforDB = nameURL;
 
-    document.getElementById('website-display').value = nameURL;
-   
-    document.getElementById('website-display').addEventListener("mouseover", mouseOver);
-    document.getElementById('website-display').addEventListener("mouseout", mouseOut);
-
+    if(!isNull('website-display')){
+        document.getElementById('website-display').value = nameURL;
+        document.getElementById('website-display').title = nameURL        
+        document.getElementById('website-display').addEventListener("mouseover", mouseOver);
+        document.getElementById('website-display').addEventListener("mouseout", mouseOut);
+        }
 });
 
 
@@ -79,8 +80,9 @@ chrome.tabs.query({
 //This is called once the report button is pressed after everything has been loaded
 
 document.addEventListener('DOMContentLoaded', function() {
+    if(!isNull('button-display')){
     document.getElementById("button-display").addEventListener("click", ReportWebsite);
-    
+    }
   });
 
 function ReportWebsite() //Reports site to the database when the button is pressed
@@ -107,6 +109,16 @@ function ReportWebsite() //Reports site to the database when the button is press
         }
     };
     xmlHttp2.send();
+}
+
+//Determines whether or not an object is null 
+function isNull(ObjectName)
+{
+    if(document.getElementById(ObjectName) == null)
+    {
+        return true;
+    }
+    return false
 }
     
     /* Aternative connections to backend -----------------------------------------------
@@ -172,24 +184,24 @@ return false;
 }
 
 //Extracts the host name from the given url
-function extractHostname(url) {
-    var hostname;
-    //find & remove protocol (http, ftp, etc.) and get hostname
+// function extractHostname(url) {
+//     var hostname;
+//     //find & remove protocol (http, ftp, etc.) and get hostname
 
-    if (url.indexOf("//") > -1) {
-        hostname = url.split('/')[2];
-    }
-    else {
-        hostname = url.split('/')[0];
-    }
+//     if (url.indexOf("//") > -1) {
+//         hostname = url.split('/')[2];
+//     }
+//     else {
+//         hostname = url.split('/')[0];
+//     }
 
-    //find & remove port number
-    hostname = hostname.split(':')[0];
-    //find & remove "?"
-    hostname = hostname.split('?')[0];
+//     //find & remove port number
+//     hostname = hostname.split(':')[0];
+//     //find & remove "?"
+//     hostname = hostname.split('?')[0];
 
-    return hostname;
-}
+//     return hostname;
+// }
 
 /*
 var xmlHttp = new XMLHttpRequest();

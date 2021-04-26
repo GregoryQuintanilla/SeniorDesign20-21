@@ -1,5 +1,8 @@
 // checks when the user navigates to a new url and displays alters if found in DB, not yet for precessing
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+browser.tabs.onUpdated.addListener(handleUpdated);
+
+function handleUpdated(tabId, changeInfo, tab) {
+    //alert("HII");
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
 
@@ -11,11 +14,15 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         xmlHttp.open("GET", fullURL, true);
         xmlHttp.onload = function(){
             if (this.responseText == "Not safe - in database"){
-                confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
+                var alertWindow = 'alert("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ")';
+                browser.tabs.executeScript({code : alertWindow});
+                //confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
                 console.log(fullURL);
                 console.log(this.responseText);
             } else if (this.responseText == "Not safe - determined") { 
-                confirm("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ");
+                var alertWindow = 'alert("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ")';
+                browser.tabs.executeScript({code : alertWindow});
+                //alert("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ");
                 console.log(fullURL);
                 console.log(this.responseText);
             } else if (this.responseText == "Safe") {
@@ -28,7 +35,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         };
         xmlHttp.send();
     }
-});
+}
 
 
 /***
@@ -56,18 +63,20 @@ chrome.tabs.query({
     //alert(tab.url); - Testing purposes ~ Instead of an alert just set the report tabs value 
     
     var nameURL = tab.url //This will return the whole link to pass in
-    var Hostname = extractHostname(tab.url); //This will return just the host name to pass in   ---****Visuals :: Host name  - Send it on the other side-use both. Bad host domains ban itnumerous reports
+    //var Hostname = extractHostname(tab.url); //This will return just the host name to pass in   ---****Visuals :: Host name  - Send it on the other side-use both. Bad host domains ban itnumerous reports
     //*****Click and highlight it -show all the url to the user 
 
 
     //Set the global variable 
-    activeTabName = Hostname;
+    //activeTabName = Hostname;
     URLforDB = nameURL;
 
-    document.getElementById('website-display').value = nameURL;
-   
-    document.getElementById('website-display').addEventListener("mouseover", mouseOver);
-    document.getElementById('website-display').addEventListener("mouseout", mouseOut);
+    if(!isNull('website-display')){
+        document.getElementById('website-display').value = nameURL;
+        document.getElementById('website-display').title = nameURL        
+        document.getElementById('website-display').addEventListener("mouseover", mouseOver);
+        document.getElementById('website-display').addEventListener("mouseout", mouseOut);
+        }
 
 });
 
@@ -79,8 +88,9 @@ chrome.tabs.query({
 //This is called once the report button is pressed after everything has been loaded
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("button-display").addEventListener("click", ReportWebsite);
-    
+    if(!isNull('button-display')){
+        document.getElementById("button-display").addEventListener("click", ReportWebsite);
+        } 
   });
 
 function ReportWebsite() //Reports site to the database when the button is pressed
@@ -107,6 +117,16 @@ function ReportWebsite() //Reports site to the database when the button is press
     };
     xmlHttp2.send();
 }
+
+//Determines whether or not an object is null 
+function isNull(ObjectName)
+{
+    if(document.getElementById(ObjectName) == null)
+    {
+        return true;
+    }
+    return false
+}
     
     /* Aternative connections to backend -----------------------------------------------
     xmlHttp2.onreadystatechange = function(){
@@ -124,12 +144,9 @@ function ReportWebsite() //Reports site to the database when the button is press
         //}
     };
     xmlHttp2.send();
-
     //alert(fullURL);
-
     //if (reportURL != undefined && reportURL != "chrome://newtab/") {
          //alert(changeInfo.url);
-
         // var xmlHttp = new XMLHttpRequest();
         // xmlHttp.open("GET", fullURL, true);
         // xmlHttp.onload = function(){
@@ -171,24 +188,24 @@ return false;
 }
 
 //Extracts the host name from the given url
-function extractHostname(url) {
-    var hostname;
-    //find & remove protocol (http, ftp, etc.) and get hostname
+// function extractHostname(url) {
+//     var hostname;
+//     //find & remove protocol (http, ftp, etc.) and get hostname
 
-    if (url.indexOf("//") > -1) {
-        hostname = url.split('/')[2];
-    }
-    else {
-        hostname = url.split('/')[0];
-    }
+//     if (url.indexOf("//") > -1) {
+//         hostname = url.split('/')[2];
+//     }
+//     else {
+//         hostname = url.split('/')[0];
+//     }
 
-    //find & remove port number
-    hostname = hostname.split(':')[0];
-    //find & remove "?"
-    hostname = hostname.split('?')[0];
+//     //find & remove port number
+//     hostname = hostname.split(':')[0];
+//     //find & remove "?"
+//     hostname = hostname.split('?')[0];
 
-    return hostname;
-}
+//     return hostname;
+// }
 
 /*
 var xmlHttp = new XMLHttpRequest();
@@ -198,7 +215,6 @@ xmlHttp.onload = function(){
     confirm("Would you like to continue browsing the page?");
 };
 xmlHttp.send();
-
 const filter = {
     urls: [
         //'*://www.google.com/*',
@@ -216,12 +232,10 @@ const filter = {
                 {
                     pageUrl: {hostEquals: 'developer.chrome.com'},
                 })
-
             ],
                 actions: [new chrome.declarativeContent.ShowPageAction()]
         }]);
     });
-
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         var url = "";
     
@@ -230,10 +244,8 @@ const filter = {
             url = tabs[0].url;
     
             var bkg = chrome.extension.getBackgroundPage();
-
             if (url != undefined){ // not a new tab with no url
                 bkg.console.log(url); // for testing, send URL to node server??
-
                 // Gets the source code of the website
                 fetch(url).then(function (response) { // The API call was successful!
                     mode: 'no-cors'
@@ -248,9 +260,7 @@ const filter = {
                 });
             }
         }); // chrome.tabs.query
-
     });  // chrome.tabs.onUpdated
-
 }); // chrome.runtime.onInstalled*/
 
 
@@ -332,7 +342,6 @@ const filter = {
         console.log(tabId);
         console.log(tab);
         console.log(tab);
-
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", "https://localhost:5000/toServer", false); 
         xmlHttp.onload = function(){
