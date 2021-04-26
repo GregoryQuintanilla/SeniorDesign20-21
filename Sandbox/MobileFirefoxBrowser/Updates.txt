@@ -1,0 +1,9 @@
+The following changes were made to convert the Chrome extension into a Firefox extension:
+
+1) In Home.html and Report.html, replace all instances of Images\ with ./Images/ and replace all instances of Style\ with ./Style/
+2) In background.js, replace all instances of chrome with browser
+3) In manifest.json, remove "declarativeContent"
+   Replace all instances of Images\ with ./Images/
+   Remove the background section
+   Change options_page to options_ui and add "page" : "options.html" (I believe options_page is deprecated)
+4) Changed PNG to png.
