@@ -248,6 +248,7 @@ function urlContainsPort(siteLink){
 function urlContainsShortener(siteLink){
     if (siteLink.includes("tinyurl")) return true;
     if (siteLink.includes("bit.ly")) return true;
+    if (siteLink.includes("weebly")) return true;
     return false;
 }
 
