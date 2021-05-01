@@ -1,28 +1,37 @@
 // checks when the user navigates to a new url and displays alters if found in DB, not yet for precessing
 browser.tabs.onUpdated.addListener(handleUpdated);
-
+  
 function handleUpdated(tabId, changeInfo, tab) {
-    //alert("HII");
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
-
     var fullURL = baseServerURL + tabURL;
 
-    if (tabURL != undefined && tabURL != "chrome://newtab/") {
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+        fullURL = baseServerURL + tabs[0].url;
+    })
 
+    if (fullURL != "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=undefined" && tabURL != "chrome://newtab/") {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", fullURL, true);
+
         xmlHttp.onload = function(){
             if (this.responseText == "Not safe - in database"){
-                var alertWindow = 'alert("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ")';
-                browser.tabs.executeScript({code : alertWindow});
-                //confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
+                var title = "Pride Protect Alert";
+                var content = "!! WARNING !! The site you are visiting was found in a phishing database. Proceed at your own risk.";
+                browser.notifications.create({
+                    "type": "basic",
+                    "iconUrl": browser.extension.getURL("./Images/Logo.png"),
+                    "title": title,
+                    "message": content
+                });
+
                 console.log(fullURL);
                 console.log(this.responseText);
             } else if (this.responseText == "Not safe - determined") { 
-                var alertWindow = 'alert("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ")';
-                browser.tabs.executeScript({code : alertWindow});
-                //alert("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ");
+                var alertWindow2 = 'alert("!! WARNING !! This site was determined to potentially be phishing. Would you like to continue browsing the page? ")';
+                browser.tabs.executeScript({code : alertWindow2});
+
                 console.log(fullURL);
                 console.log(this.responseText);
             } else if (this.responseText == "Safe") {
@@ -33,10 +42,10 @@ function handleUpdated(tabId, changeInfo, tab) {
                 console.log("Response from server: " + this.responseText);
             }
         };
+
         xmlHttp.send();
     }
 }
-
 
 /***
  *variable Declarations 

@@ -3,10 +3,12 @@
     "version": "1.0",
     "description": "Building an Extenstion!",
     "permissions": [ 
+        "tabs",
         "activeTab", 
         "storage",
         "webNavigation",
         "webRequest",
+        "notifications",
         "https://www.google.com/",
         "https://*/",
         "https://localhost:5000/toServer" 

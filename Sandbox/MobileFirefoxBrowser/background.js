@@ -1,18 +1,20 @@
 // checks when the user navigates to a new url and displays alters if found in DB, not yet for precessing
-
 browser.tabs.onUpdated.addListener(handleUpdated);
 
 function handleUpdated(tabId, changeInfo, tab) {
-    //confirm("HII");
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
-
     var fullURL = baseServerURL + tabURL;
 
-    if (tabURL != undefined && tabURL != "chrome://newtab/") {
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+      fullURL = baseServerURL + tabs[0].url;
+    })
 
+    if (fullURL != "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=undefined" && tabURL != "chrome://newtab/") {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", fullURL, true);
+
         xmlHttp.onload = function(){
             if (this.responseText == "Not safe - in database"){
                 confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
@@ -30,10 +32,10 @@ function handleUpdated(tabId, changeInfo, tab) {
                 console.log("Response from server: " + this.responseText);
             }
         };
+        
         xmlHttp.send();
     }
 }
-
 
 /***
  *variable Declarations 
