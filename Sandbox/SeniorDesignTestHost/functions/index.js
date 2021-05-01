@@ -207,7 +207,13 @@ app.get('/processSite', (request, response) => {
                             if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
                             if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
                             if (containsIP) score-=15;
-                            if (containsSSL){ score+=2 } else score -= 5; // if http, +5 points - (not recognizing HTTP right now for some reason)
+                            if (!containsSSL && numInput>0){ score-=50; } // http and login field
+                            else if (containsSSL){ // https
+                                score += 2;
+                            } else { // http
+                                score -= 5;
+                            }
+                            score -= 5;
                             if (containsAt) score-=25;
                             if (containsKeys) score-=5;
                             if (containsPort) score-=10;
@@ -219,16 +225,16 @@ app.get('/processSite', (request, response) => {
                             var serverResponse = `This website has scored ${score} points. ${debug}`;
 
                             if (score<=-25) {
-                                //response.send("Not safe - determined") ;
-                                response.send(serverResponse); // DEBUG LINE
+                                response.send("Not safe - determined") ;
+                                //response.send(serverResponse); // DEBUG LINE
                             } else {
-                                //response.send("Safe");
-                                response.send(serverResponse); // DEBUG LINE 
+                                response.send("Safe");
+                                //response.send(serverResponse); // DEBUG LINE 
                             }
                         }
                     }).catch(err => {
 
-                    response.send(`Something went wrong in /processSite route. Reason: ${err}.`);
+                    response.send("Site down");
                 });
 
                 } else if (answer == 1) { // found url in DB at some position
