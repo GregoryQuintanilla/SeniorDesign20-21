@@ -7,18 +7,33 @@ const { PerformanceObserver, performance } = require('perf_hooks');
  * URL - string - is the desired URL to be found and removed. 
  * returns nothing to the browser.
  */
-function parseURL(URL){
-   var firstSlash = URL.indexOf('/');
-   if (firstSlash == -1)
-   {
-       return "Failed to Parse URL";
-   }
+function parseURL(URL)
+{   
+    if(typeof URL != "string"){
+        console.log("Invalid data at HostParse. Provided URL is not a String");
+        return -1;
+    }
 
-   var hostStart = firstSlash+2;
-   var endOfHost = URL.indexOf('/',hostStart);
-   var hostParse = URL.slice(hostStart,endOfHost);
+    var firstSlash, hostStart;
+    if(URL.startsWith('https://') || URL.startsWith('http://'))
+    {
+        firstSlash = URL.indexOf('/');
+        hostStart = firstSlash+2;
+    }
+    else{
+        hostStart = 0;
+    }
 
-   return hostParse;
+    if (firstSlash == -1)
+    {
+        console.log("Failed to Parse URL");
+        return -1;
+    }
+
+    var endOfHost = URL.indexOf('/',hostStart);
+    var hostParse = URL.slice(hostStart,endOfHost);
+
+    return hostParse;
 }
 
 function deleteData(dbCred, URL){
@@ -39,8 +54,8 @@ function deleteData(dbCred, URL){
 // last doc in firebase old version
 function searchPromise(document, host, url)
 {
-    console.log(host);
-    console.log(url);
+    //console.log(host);
+    //console.log(url);
     if(document.exists)
     {
         var urlArray = document.data().urls;
@@ -48,6 +63,7 @@ function searchPromise(document, host, url)
         {
             if(url == urlArray[i])
             {
+                
                 return 1;
             }
         }
@@ -60,15 +76,12 @@ function searchURL(dbCred, curURL){
     if(typeof(curURL) != "string"){
         return -1;
     }
-    var firstSlash = curURL.indexOf('/');
-    var hostStart = firstSlash+2;
-    var endOfHost = curURL.indexOf('/',hostStart);
-    var hostParse = curURL.slice(hostStart,endOfHost);
+    var hostParse = parseURL(curURL);
                         
     // TODO - param check on dbCred
     // encountering lots of promises wonky-ness
     // return the id??
-    var URLCollection_promise = dbCred.collection("MaliciousSites2").doc(hostParse)
+    var URLCollection_promise = dbCred.collection("newMassTest").doc(hostParse)
     .get()
     .then(document => {
         var answer = searchPromise(document,hostParse,curURL);
@@ -96,7 +109,68 @@ function addToDB(dbCred, malURL){
     return 1;
 }
 
-function documentAdd(collection,url,host){
+function documentAdd(collection,id,data){ // host, urls
+    collection.doc(id)
+    .get()
+    .then(document => {
+        if(document.exists)
+        {   
+            var newData = []
+            console.log(document.id);
+            data.urls.foreach(newDataEle =>{
+                document.data().urls.foreach(oldDataEle =>{
+                    if(oldDataEle != newDataEle){
+                        newDataEle.push(newData);
+                    }
+                })
+
+            })
+            newData.concat(document.data().urls)
+            //var newData = document.data().urls.concat(data); 
+            collection.doc(id).update({urls:newData});
+
+        }
+        else{
+            collection.doc(id).set(data);
+        }
+    })
+    .catch(error => {
+        console.log(error)
+    });
+            /*
+            var docData = document.data();
+            for(newElement in data)
+            {
+                for(exisitingElement in data){
+                    if(newElement == oldElement){
+                        document.data() = newElement;
+                    }
+                    if(!(newElement in docData))
+                    {
+                        document.data().newElement = data[newElement];
+                    }
+                }
+            }
+            
+            var arr = document.data().urls
+            
+            if(!arr.find(element => element == url)){
+                arr.push(url);
+
+                collection.doc(document.id).set({
+                    urls: arr,
+                })
+            }
+            else{
+                console.log("this url already exists in the given host");
+            }
+        }
+        else{
+            collection.doc(document.id).set(data);
+        } */
+}
+
+function documentAdd_Stage(collection,url,host){
     collection.doc(host)
     .get()
     .then(document =>{
@@ -124,7 +198,6 @@ function documentAdd(collection,url,host){
         console.log(error)
     })
 }
-
 function massDataLoad(dbCred){
    // Is ready, just adjust the for loop to do all data.
    console.log("Loadphish tank database...");
@@ -141,22 +214,20 @@ function massDataLoad(dbCred){
                 var newLocationReq = new XMLHttpRequest();
                 newLocationReq.open("GET",newLocation,false);
                 // Each element in the data array is an entry of the phish tank DB
-
                 newLocationReq.onload = function() {
-                    var coll = dbCred.collection("MaliciousSites2");
+                    var coll = dbCred.collection("newMassTest");
                     var data = JSON.parse(newLocationReq.responseText);
+                       for (i = 0; i<data.length; i++){
+                           curURL = data[i].url;
+                           var hostParse = parseURL(curURL);
 
-                    for (i = 0; i<data.length; i++){
-                        curURL = data[i].url;
-                        
-                        //need to parse url to base hostsite.
-                        var firstSlash = curURL.indexOf('/');
-                        var hostStart = firstSlash+2;
-                        var endOfHost = curURL.indexOf('/',hostStart);
-                        var hostParse = curURL.slice(hostStart,endOfHost);
-                        documentAdd(coll,curURL,hostParse);
-                        
-                    }
+                           //var document = coll.doc("pineapple");
+                           //console.log(document);
+                           documentAdd(coll,hostParse,{urls:[curURL]})
+                           /*.get()
+                           .then(document => massDataLoadAdd_promise(document,coll,hostParse,curURL))
+                           .catch(err => { console.log(err); });*/
+                      } 
                 }
                 newLocationReq.send(null);
        }; 
@@ -166,25 +237,103 @@ function massDataLoad(dbCred){
    //return phishTankReq;
 }
 
+function massDataLoadAdd_promise(document,collection,id,curURL){
+    console.log("ID: ",id,"\nURL: ",curURL,"\n");
+    if(document.exists)
+    { 
+
+        var docData = document.data()
+        docData.urls.push(curURL);
+        documentAdd(collection,id,docData);
+    }
+    else
+    {
+        documentAdd(collection,id,{urls:[curURL]});
+    }
+}
+
 function adminLogin(dbCred, username, password){
     var adColl_prom = dbCred.collection("admin").get();;
     adColl_prom.then(answer => {
         console.log(answer.docs[0].id);
         console.log(answer.doc.data())
+    });
+}
+function addToStage(collection, url, data)
+{
+    collection.doc(url)
+    .get(document =>{
+        if(document.exists)
+        {
+            var documentData = document.data();
+            if(documentData.submissions ==4)
+            {
+                documentAdd(dbCred.collection("MaliciousSites"),document.id,{urls:docData.urls});
+            }
+        }
+    });
+}
+function preStageURL(dbCred,curURL){
+    searchURL(dbCred,curURL)
+    .then(response =>
+    {   
+        console.log(response);
+        if(response)
+        {
+            console.log("URL already exists in our Database");
+            return 1;
+        }
+        stageURL(dbCred,curURL);
     })
+    .catch(err=>{
+        console.log("Error: preStageURL:");
+        console.log(err);
+    });
 }
 
 function stageURL(dbCred, curURL){
     var coll = dbCred.collection("StagedSites");
-    var firstSlash = curURL.indexOf('/');
-    var hostStart = firstSlash+2;
-    var endOfHost = curURL.indexOf('/',hostStart);
-    var hostParse = curURL.slice(hostStart,endOfHost);
-    documentAdd(coll,curURL,hostParse);
+    var hostParse = parseURL(curURL);
+    coll.doc(hostParse).get()
+    .then(document =>
+    {
+        if(document.exists)
+        {
+            console.log("this document exisits");
+            var docData = document.data();
+            if(docData["submissions"] == 4)
+            {
+                //remove from staging and add to real
+                documentAdd(dbCred.collection("newMassTest"),document.id,{urls:[docData.urls]})
+                coll.doc(document.id).delete()
+                return 1;
+            }
+            docData.submissions++;
+            coll.doc(document.id).update(docData).then(upDocument=>
+            {
+                console.log("The following document has been updated");
+                return 1;
+            }).catch(err =>{
+                console.log("Error updating document:");
+                console.log(err);
+                return -1;
+            });
+        }
+        else{
+            var hostParse = parseURL(curURL);
+            documentAdd(coll,hostParse,{urls:curURL,submissions:1})
+            return 1;
+        }
+    })
+    .catch(err => {
+        console.log("Error: stageURL:");
+        console.log(err);
+        return -1;
+    });
 }
 // TODO
 // The framework for the automated update function. This will be very simialr to the Load function above
 // and the only differences will be when triggered, how it's triggered, and the comparison piece to update entries
 // ----- MAY NEED A TESTING FUNCTION TO DOUBLE CHECK DATA WAS LOADED CORRECTLY ----- //
 //function massDataUpdate(dbCred){}
-module.exports = {deleteData, addToDB, searchURL, massDataLoad, stageURL};
+module.exports = {deleteData, addToDB, searchURL, massDataLoad, preStageURL};
