@@ -1,14 +1,20 @@
 // checks when the user navigates to a new url and displays alters if found in DB, not yet for precessing
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+browser.tabs.onUpdated.addListener(handleUpdated);
+
+function handleUpdated(tabId, changeInfo, tab) {
     var tabURL = changeInfo.url;
     var baseServerURL = "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=";
-
     var fullURL = baseServerURL + tabURL;
 
-    if (tabURL != undefined && tabURL != "chrome://newtab/") {
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+      fullURL = baseServerURL + tabs[0].url;
+    })
 
+    if (fullURL != "https://us-central1-senior-design-test-host.cloudfunctions.net/app/processSite?link=undefined" && tabURL != "chrome://newtab/") {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", fullURL, true);
+
         xmlHttp.onload = function(){
             if (this.responseText == "Not safe - in database"){
                 confirm("!! WARNING !! This site was found in a phishing database. Would you like to continue browsing the page? ");
@@ -26,10 +32,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
                 console.log("Response from server: " + this.responseText);
             }
         };
+        
         xmlHttp.send();
     }
-});
-
+}
 
 /***
  *variable Declarations 
@@ -81,8 +87,8 @@ chrome.tabs.query({
 
 document.addEventListener('DOMContentLoaded', function() {
     if(!isNull('button-display')){
-    document.getElementById("button-display").addEventListener("click", ReportWebsite);
-    }
+        document.getElementById("button-display").addEventListener("click", ReportWebsite);
+        } 
   });
 
 function ReportWebsite() //Reports site to the database when the button is pressed
@@ -92,7 +98,6 @@ function ReportWebsite() //Reports site to the database when the button is press
     var matchStr = "Added " + reportURL + " to database.";
 
     var fullURL = baseServerURL + reportURL;
-    var bkg = chrome.extension.getBackgroundPage();
 
     var xmlHttp2 = new XMLHttpRequest();
 
@@ -100,12 +105,12 @@ function ReportWebsite() //Reports site to the database when the button is press
     xmlHttp2.onload = function(){
         if (this.responseText == matchStr){
             confirm("Thank you for your contribution! We will review your submission. ");
-            bkg.console.log(fullURL);
-            bkg.console.log(this.responseText);
+            console.log(fullURL);
+            console.log(this.responseText);
         } else { 
             confirm("Something went wrong with processing your request. We apologize for the inconvenience.");
-            bkg.console.log(fullURL);
-            bkg.console.log("Response from server: " + this.responseText);
+            console.log(fullURL);
+            console.log("Response from server: " + this.responseText);
         }
     };
     xmlHttp2.send();
