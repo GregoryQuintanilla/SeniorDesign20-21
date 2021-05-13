@@ -35,7 +35,7 @@ app.get('/addToRealTimeDB',(request,response) =>{
     });*/
     response.send(admin.auth().app);
 });
-
+// testing route
 app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
 
@@ -49,20 +49,29 @@ app.get('/massDataLoad', (request,response) => {
     response.send("hopefully data is mass loaded. idk.")
 });
 
+//testing route
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    //databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    databasefuncs.deleteData(firestoreDB, "https://www.centraleconsulta.net/index2.php");
     response.send("Deleted code specified entries");
 })
+// testing rout
 app.get('/addToDB', (request,response) => {
     databasefuncs.addToDB(firestoreDB,"https://www.centraleconsulta.net/index2.php");
-    response.send('Added data to the db hopefully');
+    response.send('Added to Database');
 });
+// testing route
+app.get('/Stage', (request,response) => {
+    databasefuncs.preStageURL(firestoreDB, "www.GregsMaliciousSite.phish.net/sendPhish/phishyphish.php");
+    response.send("Staged?");
+}
+)
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    //var search = databasefuncs.searchURL2(firestoreDB,"http://000032818.com/banks/Tangerine");
-    var search = databasefuncs.searchURL2(firestoreDB,"http://www.google.com");
+    //var search = databasefuncs.searchURL(firestoreDB,"http://000032818.com/banks/Tangerine");
+    var search = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
     console.log("back in the routing");
     console.log(search);
     search.then(answer => {
