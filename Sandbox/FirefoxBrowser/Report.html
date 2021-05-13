@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!--CSS-->
+  <link rel="stylesheet" href="./Style/style.css">
+  <link rel="stylesheet" href="./Style/report_style.css">
+
+    <script src="background.js"></script>
+
+    <link rel="stylesheet" 
+    href= 
+"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+</head>
+
+<body class="white-background">
+
+<!--Bottom Navigation-->
+<nav class="navbar fixed-bottom navbar-light bg-light" id="mainNav">
+  <ul>
+    <li class="nav-tab"><a class="nav-link" href="Home.html">
+      <div class="nav-image-icons">
+        <img src="./Images/home.png">
+  </div>
+      Home
+</a>
+</li>
+    <li class="nav-tab"><a class="nav-link active" href="Report.html">     
+    <div class="nav-image-icons ">
+      <img src="./Images/warning.png">
+</div>    
+Report 
+</a>
+</li> 
+</ul>
+</nav>
+
+<!--Main Container-->
+<div class="main-container blue-background round-border">
+
+  <!--Title Header-->
+  <div class="top-icons-container">
+    <img class="header-icon-img" src="./Images/notification.png" alt="alert"/>  
+  </div>
+<Section class="title-header-section">
+<div class="title-container">
+  <h1 class="center-title"><img class="logo" src="./Images/Logo.png" alt="logo" />Pride Protect</h1>
+</div> 
+</Section>
+
+<section id="report-section" class="centered">
+
+  <!--Message-->
+  <div>
+    <h3 class="white-text center-text">Click the Button Below to Report!</h3>
+  </div>
+    <!---->
+  <!---- Website name-->
+  <div>  
+      <div>
+        <i class="fa fa-globe fa-2x round-border-small" id="website-icon" aria-hidden="true"> </i>
+        <input id="website-display" class="child-float-right round-border-small" type="text" title="www.example.com" value="www.Example.com" readonly/>
+    </div>
+  </div>
+
+  <!--Report button-->
+   <div>
+     <div>
+      <button type="button" id="button-display" class="round-border-large pink-background white-text">Report</button> 
+  </div> 
+  </div>
+  </div>
+</section>
+</div>
+</div>
+</body>
+</html>

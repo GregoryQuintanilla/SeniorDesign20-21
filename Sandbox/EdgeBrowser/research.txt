@@ -1,0 +1,10 @@
+Notes:
+-Chrome Extension
+    - https://developer.chrome.com/docs/extensions/mv3/devguide/
+        - Sections to check out:
+            -Content Scripts
+            -Declarative Content
+            -Page Capture
+            -Tab Capture
+            -Web Navigation
+            -Declarative Net Requests

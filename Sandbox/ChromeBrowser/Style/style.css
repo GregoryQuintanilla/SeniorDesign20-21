@@ -1,0 +1,151 @@
+/* #region Main Elements */
+body{
+    margin:0;
+    width:500px;
+    height:370px;
+    font-size:medium;
+    }
+/* #endregion  */
+
+
+/* #region Navigation */
+/* Place the navbar at the bottom of the page, and make it stick */
+.logo-image{
+  width: 20px;
+  height: 20px;
+}  
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #e7e7e7;
+    background-color: #f3f3f3;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+
+  li {
+    float: left;
+  }
+  
+  li a {
+    display: block;
+    color: #666;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  li a:hover:not(.active) {
+    background-color: #ddd;
+  }
+  
+  li a.active {
+    color: white;
+    /* background-color: #4CAF50; */
+    background-color:#934E66;
+  }
+  
+.nav-tab
+{
+width:30%;
+height:2%;
+padding-bottom:1%;
+margin-left:2%;
+}
+
+.nav-image-icons{
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-top: -2px;
+  float:left;
+  overflow:hidden
+}
+/* #endregion */
+
+
+/*region Title Header Section */
+.logo
+{
+    width:12%;
+    height:100%;
+    float: left;
+    padding:none;
+    margin-left:3%;
+}
+
+.main-container
+{
+    height:85%;
+}
+
+.title-header-section
+{
+    background-color:#F7F7F7;
+    width:100%;
+    height:20%;
+}
+.header-icon-img
+{
+    width:4%;
+    height:4%;
+    float: right;
+    margin-top:1%;
+    margin-right:2%;
+}
+/* #endregion */
+
+
+/*#region Generic Styles*/
+.center-title
+{
+text-align: center;
+vertical-align: center;
+font-size: xx-large;
+}
+
+.center-text
+{
+text-align: center;
+vertical-align: center;
+}
+
+.child-float-right
+{
+float:right;
+}
+
+.round-border-large
+{
+  border-radius: 10px;
+}
+
+.round-border-small
+{
+  border-radius: 3px;
+}
+
+.blue-background
+{
+  background-color: #0C394D;
+}
+
+.pink-background
+{
+  background-color:#934E66;
+}
+.white-background
+{
+  background-color:#ffffff;
+}
+
+.white-text
+{
+  color:white;
+}
+
+/*#endregion */

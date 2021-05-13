@@ -35,6 +35,7 @@ app.get('/addToRealTimeDB',(request,response) =>{
     });*/
     response.send(admin.auth().app);
 });
+// testing route
 app.get('/massDataLoad', (request,response) => {
     response.set('Access-Controle-Allow-Origin','*');
 
@@ -47,23 +48,45 @@ app.get('/massDataLoad', (request,response) => {
 
     response.send("hopefully data is mass loaded. idk.")
 });
+
+//testing route
 app.get('/del', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    //databasefuncs.deleteData(firestoreDB,"https://www.centraleconsulta.net/index2.php");
+    databasefuncs.deleteData(firestoreDB, "https://www.centraleconsulta.net/index2.php");
     response.send("Deleted code specified entries");
 })
+// testing rout
 app.get('/addToDB', (request,response) => {
     databasefuncs.addToDB(firestoreDB,"https://www.centraleconsulta.net/index2.php");
-    response.send('Added data to the db hopefully');
+    response.send('Added to Database');
 });
+// testing route
+app.get('/Stage', (request,response) => {
+    databasefuncs.preStageURL(firestoreDB, "www.GregsMaliciousSite.phish.net/sendPhish/phishyphish.php");
+    response.send("Staged?");
+}
+)
 
 app.get('/findURL', (request, response) => {
     response.set('Access-Control-Allow-Origin','*');
-    var positive = databasefuncs.searchURL(firestoreDB,"http://pt-o.top/awb.html");
-    var negative = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
-    console.log("SENDING RESPONSE??");
-    positive.then(answer => {
-        response.send(answer);
+    //var search = databasefuncs.searchURL(firestoreDB,"http://000032818.com/banks/Tangerine");
+    var search = databasefuncs.searchURL(firestoreDB,"http://www.google.com");
+    console.log("back in the routing");
+    console.log(search);
+    search.then(answer => {
+        console.log("answer is ", answer);
+        if(answer == 1)
+        {
+            response.json({status:100,found:1});
+        }
+        else{
+            response.json({status:100,found:0});
+        }
+    })
+    .catch(err =>
+    {
+        response.sendStatus(500);
     });
     //response.send("Postivie: " + String(positive) + " and Negative: " + String(negative));
 })
@@ -89,15 +112,12 @@ app.get('/getData', (request,response) => {
 
 app.get('/reportLink', (request, response) => {
     // Generate URL object
-    const givenURL = new URL(request.query.link);
+    var url = request.query.link;
 
     // Add document for URL
-    testDocRef.doc('urlTest').set({
-        url: `${givenURL}`,
-        online: 'true'
-    });
+    databasefuncs.stageURL(firestoreDB, url);
     // If valid
-    response.send(`Added ${givenURL} to database.`);
+    response.send(`Added ${url} to database.`);
 });
 
 app.get('/timestamp', (request, response) => {
@@ -116,8 +136,9 @@ app.get('/getSourceCode', (request, response) => {
         if(request.query.link == undefined || request.query.link == "") {
             //no link, do nothing
             response.send("URL cannot be undefined");
-
-        } else {
+        
+        } 
+        else {
             var code = processing.getSourceCode(url);
 
             code.then(result => {
@@ -126,7 +147,7 @@ app.get('/getSourceCode', (request, response) => {
                 response.send(src);
 
             }).catch(err => {
-                console.warn('Something went wrong in /getSourceCode route.', err);
+                response.send(err);
              });
         }
 });
@@ -153,6 +174,87 @@ app.get('/numInputFields', (request, response) => {
             }).catch(err => {
                 console.warn('Something went wrong in /numInputFields route.', err);
              });
+        }
+});
+
+app.get('/processSite', (request, response) => {
+    // processes the given URL to determine if malicious
+    var url = request.query.link;
+
+        if(request.query.link == undefined || request.query.link == "") {
+            //no link, do nothing
+            response.send("URL cannot be undefined");
+
+        } else {
+            // Begin Stage 1: search in DB
+            response.set('Access-Control-Allow-Origin','*');
+
+            var DBSearchResponse = databasefuncs.searchURL2(firestoreDB, url);
+
+            DBSearchResponse.then(answer => {
+                if (answer == -2){ // URL is not a not string
+                    response.send("URL is not a string");
+                } else if(answer == -1){  // not found in DB
+
+                    // Stage 2: If URL not found, begin processing methods here
+                    var code = processing.getSourceCode(url);
+
+                    code.then(result => {
+                        var containsSSL = processing.urlContainsSSL(url);
+                        var containsIP = processing.urlContainsIP(url);
+                        var containsAt = processing.urlContainsAt(url);
+                        var containsKeys = processing.urlContainsKeyPhrase(url);
+                        var containsPort = processing.urlContainsPort(url);
+                        var containsShortener = processing.urlContainsShortener(url);
+                        if (result.toString().includes("FetchError")) {
+                            response.send("Site down");
+                        } else {
+                            var numInput = processing.inputFields(result);
+                            var numKeyPhrases = processing.keyPhrases(result);
+                            var score = 0;
+
+                            if (numInput==0){ score+=20 } else score -= numInput*2; // if no input fields, likely not malicious
+                            if (numKeyPhrases==0){ score+=20 } else score -= numKeyPhrases*2;
+                            if (containsIP) score-=15;
+                            if (!containsSSL && numInput>0){ score-=50; } // http and login field
+                            else if (containsSSL){ // https
+                                score += 2;
+                            } else { // http
+                                score -= 5;
+                            }
+                            score -= 5;
+                            if (containsAt) score-=25;
+                            if (containsKeys) score-=5;
+                            if (containsPort) score-=10;
+                            if (containsShortener) score-=5;
+ 
+                            var debug = `Website: ${url} has ${numInput} input field(s), has ${numKeyPhrases} key phrase(s), containsIP?: ${containsIP}, containsSSL?: ${containsSSL}, 
+                            containsAt? ${containsAt}, containsKeys?: ${containsKeys}, containsPort?: ${containsPort}.`; 
+
+                            var serverResponse = `This website has scored ${score} points. ${debug}`;
+
+                            if (score<=-25) {
+                                response.send("Not safe - determined") ;
+                                //response.send(serverResponse); // DEBUG LINE
+                            } else {
+                                response.send("Safe");
+                                //response.send(serverResponse); // DEBUG LINE 
+                            }
+                        }
+                    }).catch(err => {
+
+                    response.send("Site down");
+                });
+
+                } else if (answer == 1) { // found url in DB at some position
+                    response.send("Not safe - in database"); // If found, cut processing here.
+                } else {
+                    response.send("err");
+                }
+            }).catch(err => {
+                console.warn("An error occured in processSite route while searching the DB", err);
+            });
+
         }
 });
 
